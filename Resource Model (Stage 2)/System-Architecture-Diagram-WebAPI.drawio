@@ -1,0 +1,85 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Page-1" id="62JJpr9CX1U2oVaT2wzk">
+    <mxGraphModel dx="1148" dy="954" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;gradientColor=none;" value="" vertex="1">
+          <mxGeometry height="280" width="810" x="20" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-33" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="190" width="250" x="550" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-22" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="190" width="470" x="50" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-8" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="130" width="210" x="70" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-2" parent="b-hAepz9bg8VSAZQ9hMZ-8" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="130" width="210" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-3" parent="b-hAepz9bg8VSAZQ9hMZ-8" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;" value="&lt;b&gt;Police Officers&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="210" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-4" parent="b-hAepz9bg8VSAZQ9hMZ-8" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;All 8 roles&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="75" x="67.5" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-5" parent="b-hAepz9bg8VSAZQ9hMZ-8" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="JWT Bearer" vertex="1">
+          <mxGeometry height="30" width="75" x="25" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-6" parent="b-hAepz9bg8VSAZQ9hMZ-8" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Postman / curl" vertex="1">
+          <mxGeometry height="30" width="85" x="100" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-15" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="130" width="210" x="290" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-16" parent="b-hAepz9bg8VSAZQ9hMZ-15" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="130" width="210" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-17" parent="b-hAepz9bg8VSAZQ9hMZ-15" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;" value="&lt;b&gt;Tracking Devices&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="210" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-18" parent="b-hAepz9bg8VSAZQ9hMZ-15" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;X-Device-Key&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="210" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-19" parent="b-hAepz9bg8VSAZQ9hMZ-15" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Push real time location information" vertex="1">
+          <mxGeometry height="30" width="210" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-31" connectable="0" parent="1" style="group" value="" vertex="1">
+          <mxGeometry height="130" width="210" x="570" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-26" parent="b-hAepz9bg8VSAZQ9hMZ-31" style="rounded=1;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="130" width="210" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-30" connectable="0" parent="b-hAepz9bg8VSAZQ9hMZ-31" style="group" value="" vertex="1">
+          <mxGeometry height="90" width="210" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-14" parent="b-hAepz9bg8VSAZQ9hMZ-30" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Push vehicle and driver details" vertex="1">
+          <mxGeometry height="30" width="210" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-12" parent="b-hAepz9bg8VSAZQ9hMZ-30" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;DATA_REGISTRAR role&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="210" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-11" parent="b-hAepz9bg8VSAZQ9hMZ-30" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=16;" value="&lt;b&gt;DMT System&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="210" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-34" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=20;fontStyle=1" value="&lt;font&gt;Client Layer&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="140" x="355" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-35" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Indirect (External)" vertex="1">
+          <mxGeometry height="30" width="115" x="617.5" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-36" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Direct Users" vertex="1">
+          <mxGeometry height="30" width="115" x="227.5" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-37" parent="1" style="rounded=1;whiteSpace=wrap;html=1;gradientColor=none;" value="" vertex="1">
+          <mxGeometry height="280" width="810" x="20" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="b-hAepz9bg8VSAZQ9hMZ-38" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontSize=20;fontStyle=1" value="&lt;font&gt;Network Layer AWS VPC&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="255" x="298" y="460" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
