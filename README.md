@@ -9,7 +9,15 @@ A secure REST API backend for managing police vehicle tracking, registration, an
 ## Project Status
  
 In Development
- 
+
+---
+
+## Project Stages
+
+- **Stage 1: [Data Model Definition](./Data%20Model%20(Stage%201)/data_model.md)**
+
+
+- **Stage 2: [Resource Model Definition](./Resource%20Model%20(Stage%202)/resource-model.md)**
 ---
  
 ## Tech Stack
