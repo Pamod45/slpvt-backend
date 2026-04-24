@@ -1,0 +1,87 @@
+/**
+ * Vehicles table migration
+ * Represents registered tuk-tuks pulled from DMT database
+ * Each vehicle can have one tracking device installed
+ * Police status tracks law enforcement flags on the vehicle
+ */
+
+export const up = function (knex) {
+  return knex.schema.createTable('vehicles', (table) => {
+    table
+      .uuid('vehicle_id')
+      .primary()
+      .defaultTo(knex.raw('gen_random_uuid()'))
+
+    table
+      .string('registration_number', 20)
+      .notNullable()
+      .unique()
+      .comment('Official DMT registration number e.g. WP CAB-1234')
+
+    table
+      .string('chassis_number', 50)
+      .notNullable()
+      .unique()
+      .comment('Vehicle chassis number from manufacturer')
+
+    table
+      .string('color', 50)
+      .notNullable()
+
+    table
+      .string('make_model', 100)
+      .notNullable()
+      .comment('e.g. Bajaj RE, TVS King')
+
+    table
+      .uuid('device_id')
+      .nullable()
+      .references('device_id')
+      .inTable('tracking_devices')
+      .onDelete('SET NULL')
+      .comment('Tracking device installed in this vehicle — nullable if no device assigned')
+
+    table
+      .enu('police_status', [
+        'CLEAN',
+        'STOLEN',
+        'WANTED',
+        'SUSPENDED'
+      ])
+      .notNullable()
+      .defaultTo('CLEAN')
+      .comment('Current law enforcement status of the vehicle')
+
+    table
+      .string('owner_nic', 20)
+      .notNullable()
+      .comment('Owner National Identity Card number — Sri Lankan NIC format')
+
+    table
+      .string('owner_first_name', 100)
+      .notNullable()
+
+    table
+      .string('owner_last_name', 100)
+      .notNullable()
+
+    table
+      .string('owner_contact', 20)
+      .nullable()
+      .comment('Owner contact number in +94XXXXXXXXX format')
+
+    table
+      .uuid('registered_province_id')
+      .notNullable()
+      .references('province_id')
+      .inTable('provinces')
+      .onDelete('RESTRICT')
+      .comment('Province where the vehicle is registered at DMT')
+
+    table.timestamps(true, true)
+  })
+}
+
+export const down = function (knex) {
+  return knex.schema.dropTableIfExists('vehicles')
+}
