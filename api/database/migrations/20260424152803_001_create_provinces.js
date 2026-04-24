@@ -16,11 +16,6 @@ export const up = function (knex) {
       .notNullable()
       .unique()
 
-    table
-      .text('boundary_polygon')
-      .nullable()
-      .comment('GeoJSON or WKT polygon string representing province boundary')
-
     table.timestamps(true, true)
   })
 }

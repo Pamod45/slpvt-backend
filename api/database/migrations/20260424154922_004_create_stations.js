@@ -46,11 +46,6 @@ export const up = function (knex) {
       .nullable()
       .comment('Station location longitude')
 
-    table
-      .text('boundary_polygon')
-      .nullable()
-      .comment('GeoJSON or WKT polygon representing station jurisdiction')
-
     table.timestamps(true, true)
   })
 }
