@@ -1,6 +1,7 @@
 /**
  * Vehicles seed
- * 210 tuk-tuks distributed across Western, Central and Southern provinces
+ * 205 tuk-tuks distributed across Western, Central and Southern provinces
+ * Each vehicle assigned to a specific DS division matching DMT registration
  * Linked to tracking devices seeded in 07_tracking_devices
  * Owner details generated with Sri Lankan names
  * Registration numbers follow official Sri Lanka DMT format
@@ -9,19 +10,24 @@
 export const seed = async function (knex) {
   await knex('vehicles').del()
 
-  const provinces = await knex('provinces')
-    .select('province_id', 'name')
-    .whereIn('name', ['Western', 'Central', 'Southern'])
+  const devices = await knex('tracking_devices')
+    .select('device_id', 'serial_number', 'admin_status')
+    .whereIn('admin_status', ['ACTIVE', 'UNDER_REPAIR'])
+    .orderBy('serial_number')
 
-  const p = {}
-  provinces.forEach(prov => {
-    p[prov.name] = prov.province_id
-  })
+  const dsDivisions = await knex('divisional_secretariats as ds')
+    .join('districts as d', 'ds.district_id', 'd.district_id')
+    .join('provinces as p', 'd.province_id', 'p.province_id')
+    .select(
+      'ds.ds_division_id',
+      'ds.name as ds_name',
+      'd.name as district_name',
+      'p.name as province_name'
+    )
 
-const devices = await knex('tracking_devices')
-  .select('device_id', 'serial_number', 'admin_status')
-  .whereIn('admin_status', ['ACTIVE', 'UNDER_REPAIR'])
-  .orderBy('serial_number')
+  const westernDS  = dsDivisions.filter(ds => ds.province_name === 'Western')
+  const centralDS  = dsDivisions.filter(ds => ds.province_name === 'Central')
+  const southernDS = dsDivisions.filter(ds => ds.province_name === 'Southern')
 
   const sriLankanFirstNames = [
     'Nuwan', 'Kamal', 'Roshan', 'Chaminda', 'Pradeep',
@@ -81,17 +87,17 @@ const devices = await knex('tracking_devices')
     return `+94${prefix.slice(1)}${number}`
   }
 
-  const provinceDistribution = [
-    ...Array(115).fill('Western'),
-    ...Array(50).fill('Central'),
-    ...Array(40).fill('Southern')
-  ]
-
   const policeStatuses = [
     ...Array(185).fill('CLEAN'),
     ...Array(8).fill('STOLEN'),
     ...Array(7).fill('WANTED'),
     ...Array(5).fill('SUSPENDED')
+  ]
+
+  const provinceDistribution = [
+    ...Array(115).fill('Western'),
+    ...Array(50).fill('Central'),
+    ...Array(40).fill('Southern')
   ]
 
   const provinceCodes = {
@@ -113,43 +119,49 @@ const devices = await knex('tracking_devices')
     if (letterCombinations.length >= 210) break
   }
 
+  const getDSForProvince = (provinceName) => {
+    if (provinceName === 'Western')  return getRandom(westernDS)
+    if (provinceName === 'Central')  return getRandom(centralDS)
+    if (provinceName === 'Southern') return getRandom(southernDS)
+    return getRandom(westernDS)
+  }
+
   const vehicles = []
 
   for (let i = 0; i < 205; i++) {
-    const provinceName = provinceDistribution[i]
-    const provinceCode = provinceCodes[provinceName]
-    const letters = letterCombinations[i]
-    const number = String(Math.floor(Math.random() * 9000) + 1000)
-    const registrationNumber = `${provinceCode} ${letters}-${number}`
-
+    const provinceName  = provinceDistribution[i]
+    const provinceCode  = provinceCodes[provinceName]
+    const letterCombo   = letterCombinations[i]
+    const number        = String(Math.floor(Math.random() * 9000) + 1000)
+    const registrationNumber = `${provinceCode} ${letterCombo}-${number}`
     const chassisNumber = `CHASSIS${String(i + 1).padStart(8, '0')}`
+    const ds            = getDSForProvince(provinceName)
+    const firstName     = getRandom(sriLankanFirstNames)
+    const lastName      = getRandom(sriLankanLastNames)
 
     let deviceId = null
-    if (i < 205) {
+    if (i < devices.length) {
       deviceId = devices[i].device_id
     }
 
-    const firstName = getRandom(sriLankanFirstNames)
-    const lastName = getRandom(sriLankanLastNames)
-
     vehicles.push({
-      registration_number:    registrationNumber,
-      chassis_number:         chassisNumber,
-      color:                  getRandom(colors),
-      make_model:             makeModelList[i],
-      device_id:              deviceId,
-      police_status:          policeStatuses[i],
-      owner_nic:              generateNIC(i),
-      owner_full_name:        `${firstName} ${lastName}`,
-      owner_contact:          generateContact(),
-      registered_province_id: p[provinceName]
+      registration_number: registrationNumber,
+      chassis_number:      chassisNumber,
+      color:               getRandom(colors),
+      make_model:          makeModelList[i],
+      device_id:           deviceId,
+      police_status:       policeStatuses[i],
+      owner_nic:           generateNIC(i),
+      owner_full_name:     `${firstName} ${lastName}`,
+      owner_contact:       generateContact(),
+      ds_division_id:      ds.ds_division_id
     })
   }
 
   await knex('vehicles').insert(vehicles)
 
   console.log('205 vehicles seeded')
-  console.log('Western Province: 115 vehicles')
-  console.log('Central Province: 50 vehicles')
-  console.log('Southern Province: 40 vehicles')
+  console.log('Western Province: 115 vehicles across 15 DS divisions')
+  console.log('Central Province: 50 vehicles across 4 DS divisions')
+  console.log('Southern Province: 40 vehicles across 10 DS divisions')
 }

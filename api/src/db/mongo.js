@@ -1,14 +1,15 @@
 /**
- * MongoDB connection
- * Used by the application at runtime
- * Separate from the seeder script which creates its own connection
+ * MongoDB connection via Mongoose
+ * Single shared connection used across all location related files
+ * Connects once on application startup
  */
 
 import mongoose from 'mongoose'
+import { env } from '../config/environment.js'
 
 const connectMongo = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI)
+    await mongoose.connect(env.mongo.uri)
     console.log('MongoDB connected successfully')
   } catch (err) {
     console.error('MongoDB connection failed:', err.message)
