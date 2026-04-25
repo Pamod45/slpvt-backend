@@ -68,12 +68,12 @@ export const up = function (knex) {
       .comment('Owner contact number in +94XXXXXXXXX format')
 
     table
-      .uuid('registered_province_id')
+      .uuid('ds_division_id')
       .notNullable()
-      .references('province_id')
-      .inTable('provinces')
+      .references('ds_division_id')
+      .inTable('divisional_secretariats')
       .onDelete('RESTRICT')
-      .comment('Province where vehicle is registered at DMT — always required')
+      .comment('DS division this station belongs to')
 
     table.timestamps(true, true)
   })

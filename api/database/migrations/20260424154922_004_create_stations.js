@@ -12,6 +12,11 @@ export const up = function (knex) {
       .defaultTo(knex.raw('gen_random_uuid()'))
 
     table
+      .enum('station_type', ['Police Post', "Division Office", 'Range Office', "Police Headquarters"])
+      .notNullable()
+      .comment('Type of station determines its role and jurisdiction scope')
+
+    table
       .uuid('ds_division_id')
       .nullable()
       .references('ds_division_id')
@@ -34,14 +39,6 @@ export const up = function (knex) {
       .inTable('provinces')
       .onDelete('RESTRICT')
       .comment('Province this district belongs to')
-
-    table
-      .uuid('station_type_id')
-      .notNullable()
-      .references('station_type_id')
-      .inTable('station_types')
-      .onDelete('RESTRICT')
-      .comment('Type of police station')
 
     table
       .string('name', 150)

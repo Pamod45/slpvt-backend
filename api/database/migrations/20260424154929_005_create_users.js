@@ -45,6 +45,7 @@ export const up = function (knex) {
         'PROVINCIAL_COMMANDER',
         'PROVINCIAL_OFFICER',
         'DISTRICT_COMMANDER',
+        'DISTRICT_OFFICER',
         'STATION_COMMANDER',
         'STATION_OFFICER',
         'DATA_REGISTRAR',

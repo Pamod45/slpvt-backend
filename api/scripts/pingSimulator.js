@@ -281,17 +281,19 @@ const run = async () => {
     )
     console.log('Indexes created')
 
-    const vehicles = await db('vehicles')
-      .join('provinces', 'vehicles.registered_province_id', 'provinces.province_id')
-      .whereNotNull('vehicles.device_id')
-      .select(
-        'vehicles.vehicle_id',
-        'vehicles.device_id',
-        'vehicles.police_status',
-        'vehicles.registration_number',
-        'provinces.name as province_name'
-      )
-      .orderBy('vehicles.registration_number')
+  const vehicles = await db('vehicles')
+  .join('divisional_secretariats', 'vehicles.ds_division_id', 'divisional_secretariats.ds_division_id')
+  .join('districts', 'divisional_secretariats.district_id', 'districts.district_id')
+  .join('provinces', 'districts.province_id', 'provinces.province_id')
+  .whereNotNull('vehicles.device_id')
+  .select(
+    'vehicles.vehicle_id',
+    'vehicles.device_id',
+    'vehicles.police_status',
+    'vehicles.registration_number',
+    'provinces.name as province_name'
+  )
+  .orderBy('vehicles.registration_number')
 
     console.log(`Found ${vehicles.length} vehicles with devices`)
     console.log(`Generating 7 days of pings at 2 minute intervals`)

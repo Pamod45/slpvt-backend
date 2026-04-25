@@ -21,18 +21,6 @@ export const seed = async function (knex) {
 
   const passwordHash = await bcrypt.hash('Test@1234', 12)
 
-  const provinces = await knex('provinces').select('province_id', 'name')
-  const p = {}
-  provinces.forEach(prov => {
-    p[prov.name] = prov.province_id
-  })
-
-  const districts = await knex('districts').select('district_id', 'name')
-  const d = {}
-  districts.forEach(dist => {
-    d[dist.name] = dist.district_id
-  })
-
   const stations = await knex('stations').select('station_id', 'name')
   const s = {}
   stations.forEach(st => {
@@ -46,9 +34,7 @@ export const seed = async function (knex) {
       first_name:          'Rohan',
       last_name:           'Perera',
       system_role:         'SUPER_ADMIN',
-      assigned_station_id: null,
-      assigned_district_id: null,
-      assigned_province_id: null,
+      assigned_station_id: s['Police Headquarters'],
       is_active:           true
     },
     {
@@ -57,9 +43,7 @@ export const seed = async function (knex) {
       first_name:          'Nimal',
       last_name:           'Silva',
       system_role:         'PROVINCIAL_COMMANDER',
-      assigned_station_id: null,
-      assigned_district_id: null,
-      assigned_province_id: p['Western'],
+      assigned_station_id: s['Western Province Range Office'],
       is_active:           true
     },
     {
@@ -68,9 +52,7 @@ export const seed = async function (knex) {
       first_name:          'Kamal',
       last_name:           'Fernando',
       system_role:         'PROVINCIAL_OFFICER',
-      assigned_station_id: null,
-      assigned_district_id: null,
-      assigned_province_id: p['Western'],
+      assigned_station_id: s['Western Province Range Office'],
       is_active:           true
     },
     {
@@ -79,45 +61,46 @@ export const seed = async function (knex) {
       first_name:          'Sunil',
       last_name:           'Rajapaksa',
       system_role:         'DISTRICT_COMMANDER',
-      assigned_station_id: null,
-      assigned_district_id: d['Colombo'],
-      assigned_province_id: p['Western'],
+      assigned_station_id: s['Colombo Division Office'],
       is_active:           true
     },
     {
       badge_number:        'SLP-00005',
       password_hash:       passwordHash,
-      first_name:          'Priya',
-      last_name:           'Jayawardena',
-      system_role:         'STATION_COMMANDER',
-      assigned_station_id: s['Colombo Police Post'],
-      assigned_district_id: d['Colombo'],
-      assigned_province_id: p['Western'],
+      first_name:          'Pubudu',
+      last_name:           'Perera',
+      system_role:         'DISTRICT_OFFICER',
+      assigned_station_id: s['Colombo Division Office'],
       is_active:           true
     },
     {
       badge_number:        'SLP-00006',
       password_hash:       passwordHash,
-      first_name:          'Dilshan',
-      last_name:           'Wickramasinghe',
-      system_role:         'STATION_OFFICER',
+      first_name:          'Priya',
+      last_name:           'Jayawardena',
+      system_role:         'STATION_COMMANDER',
       assigned_station_id: s['Colombo Police Post'],
-      assigned_district_id: d['Colombo'],
-      assigned_province_id: p['Western'],
       is_active:           true
     },
     {
       badge_number:        'SLP-00007',
       password_hash:       passwordHash,
+      first_name:          'Dilshan',
+      last_name:           'Wickramasinghe',
+      system_role:         'STATION_OFFICER',
+      assigned_station_id: s['Colombo Police Post'],
+      is_active:           true
+    },
+    {
+      badge_number:        'SLP-00008',
+      password_hash:       passwordHash,
       first_name:          'Chaminda',
       last_name:           'Bandara',
       system_role:         'DATA_REGISTRAR',
-      assigned_station_id: null,
-      assigned_district_id: null,
-      assigned_province_id: null,
+      assigned_station_id: s['Police Headquarters'],
       is_active:           true
     }
   ])
 
-  console.log('7 users seeded — all passwords: Test@1234')
+  console.log('8 users seeded — all passwords: Test@1234')
 }
