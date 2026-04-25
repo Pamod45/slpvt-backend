@@ -40,22 +40,6 @@ export const up = function (knex) {
       .comment('Populated for station level roles')
 
     table
-      .uuid('assigned_district_id')
-      .nullable()
-      .references('district_id')
-      .inTable('districts')
-      .onDelete('RESTRICT')
-      .comment('Populated for district level and above roles')
-
-    table
-      .uuid('assigned_province_id')
-      .nullable()
-      .references('province_id')
-      .inTable('provinces')
-      .onDelete('RESTRICT')
-      .comment('Populated for provincial level and above roles')
-
-    table
       .enu('system_role', [
         'SUPER_ADMIN',
         'PROVINCIAL_COMMANDER',

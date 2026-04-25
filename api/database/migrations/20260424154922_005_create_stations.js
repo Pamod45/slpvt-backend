@@ -12,12 +12,28 @@ export const up = function (knex) {
       .defaultTo(knex.raw('gen_random_uuid()'))
 
     table
+      .uuid('ds_division_id')
+      .nullable()
+      .references('ds_division_id')
+      .inTable('divisional_secretariats')
+      .onDelete('RESTRICT')
+      .comment('DS division this station belongs to')
+
+    table
       .uuid('district_id')
-      .notNullable()
+      .nullable()
       .references('district_id')
       .inTable('districts')
       .onDelete('RESTRICT')
       .comment('District this station belongs to')
+
+    table
+      .uuid('province_id')
+      .nullable()
+      .references('province_id')
+      .inTable('provinces')
+      .onDelete('RESTRICT')
+      .comment('Province this district belongs to')
 
     table
       .uuid('station_type_id')

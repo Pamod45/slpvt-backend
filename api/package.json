@@ -8,14 +8,15 @@
   "license": "ISC",
   "type": "module",
   "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js",
-  "lint": "eslint src/**/*.js",
-  "migrate": "knex migrate:latest",
-  "migrate:rollback": "knex migrate:rollback",
-  "seed": "knex seed:run"
-},
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "lint": "eslint src/**/*.js",
+    "migrate": "knex migrate:latest",
+    "migrate:rollback": "knex migrate:rollback",
+    "seed": "knex seed:run"
+  },
   "dependencies": {
+    "@turf/turf": "^7.3.5",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

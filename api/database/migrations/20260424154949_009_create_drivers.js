@@ -32,6 +32,11 @@ export const up = function (knex) {
       .comment('Official driving license number issued by DMT')
 
     table
+      .date('license_expiry_date')
+      .notNullable()
+      .comment('Driving license expiry date')
+
+    table
       .enu('police_status', [
         'CLEAR',
         'WANTED',
