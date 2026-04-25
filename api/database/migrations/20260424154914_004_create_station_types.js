@@ -15,7 +15,7 @@ export const up = function (knex) {
       .string('type_name', 100)
       .notNullable()
       .unique()
-      .comment('Main Station, Police Post, Range Office')
+      .comment('Main Station, Police Post, Range Office', 'Police Headquarters')
 
     table.timestamps(true, true)
   })

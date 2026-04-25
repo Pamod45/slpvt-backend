@@ -18,6 +18,8 @@ In Development
 
 
 - **Stage 2: [Resource Model Definition](./Resource%20Model%20(Stage%202)/resource-model.md)**
+
+- **Stage 3: [Database setup and Seeding](./api/docs/database_setup.md)**
 ---
  
 ## Tech Stack

@@ -3,6 +3,7 @@
  * Represents registered tuk-tuks pulled from DMT database
  * Each vehicle can have one tracking device installed
  * Police status tracks law enforcement flags on the vehicle
+ * Geographic registration fields enable jurisdiction-based filtering
  */
 
 export const up = function (knex) {
@@ -58,11 +59,7 @@ export const up = function (knex) {
       .comment('Owner National Identity Card number — Sri Lankan NIC format')
 
     table
-      .string('owner_first_name', 100)
-      .notNullable()
-
-    table
-      .string('owner_last_name', 100)
+      .string('owner_full_name', 200)
       .notNullable()
 
     table
@@ -76,7 +73,7 @@ export const up = function (knex) {
       .references('province_id')
       .inTable('provinces')
       .onDelete('RESTRICT')
-      .comment('Province where the vehicle is registered at DMT')
+      .comment('Province where vehicle is registered at DMT — always required')
 
     table.timestamps(true, true)
   })
