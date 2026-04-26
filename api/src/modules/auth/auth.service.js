@@ -85,10 +85,6 @@ export const login = async (badgeNumber, password) => {
     throw new UnauthorizedError('Invalid badge number or password')
   }
 
-  if (!user.is_active) {
-    throw new ForbiddenError('This account has been deactivated')
-  }
-
   logger.info('User login successful', {
     user_id:      user.user_id,
     badge_number: user.badge_number,
@@ -156,7 +152,7 @@ export const refresh = async (rawRefreshToken) => {
   // verify user still exists and is active
   const user = await findUserById(tokenRecord.user_id)
 
-  if (!user || !user.is_active) {
+  if (!user) {
     throw new UnauthorizedError('User account is no longer active')
   }
 

@@ -192,7 +192,7 @@ export const SCOPE_TYPES = {
 export const SCOPE_TO_STATION_TYPE = {
   country:    'Police Headquarters',
   province:   'Range Office',
-  district:   'Division Office',
+  district:   ' ',
   divisional: 'Police Post'
 }
 

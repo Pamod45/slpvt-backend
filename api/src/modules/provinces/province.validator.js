@@ -20,6 +20,7 @@ export const provinceParamsSchema = Joi.object({
 })
 
 export const provinceQuerySchema = Joi.object({
+  name:     Joi.string().optional().allow(''),
   offset:   Joi.number().integer().min(0).default(0),
   limit:    Joi.number().integer().min(1).max(100).default(20),
   sort_by:  Joi.string().valid('name', 'created_at').default('name'),

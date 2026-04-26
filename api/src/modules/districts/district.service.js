@@ -5,9 +5,15 @@
 
 import * as districtRepository from './district.repository.js'
 import { NotFoundError } from '../../utils/errors.js'
+import { formatDistrict } from './district.presenter.js'
+import { formatDivisionalSecretariat } from '../divisional-secretariats/divisional-secretariat.presenter.js'
 
 export const listDistricts = async (pagination) => {
-  return districtRepository.findAll(pagination)
+  const result = await districtRepository.findAll(pagination)
+  return {
+    count: result.count,
+    data: result.data.map(formatDistrict)
+  }
 }
 
 export const getDistrictBySlug = async (districtSlug) => {
@@ -17,7 +23,7 @@ export const getDistrictBySlug = async (districtSlug) => {
     throw new NotFoundError('District not found')
   }
 
-  return district
+  return formatDistrict(district)
 }
 
 export const getDistrictDivisionalSecretariats = async (districtSlug, pagination) => {
@@ -34,6 +40,6 @@ export const getDistrictDivisionalSecretariats = async (districtSlug, pagination
     district_name: district.name,
     district_slug: district.district_slug,
     count:         result.count,
-    data:          result.data
+    data:          result.data.map(formatDivisionalSecretariat)
   }
 }

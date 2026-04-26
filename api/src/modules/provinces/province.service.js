@@ -7,9 +7,15 @@
 
 import * as provinceRepository from './province.repository.js'
 import { NotFoundError, ConflictError } from '../../utils/errors.js'
+import { formatProvince } from './province.presenter.js'
+import { formatDistrict } from '../districts/district.presenter.js'
 
 export const listProvinces = async (pagination) => {
-  return provinceRepository.findAll(pagination)
+  const result = await provinceRepository.findAll(pagination)
+  return {
+    count: result.count,
+    data: result.data.map(formatProvince)
+  }
 }
 
 export const getProvinceById = async (provinceId) => {
@@ -19,7 +25,7 @@ export const getProvinceById = async (provinceId) => {
     throw new NotFoundError('Province not found')
   }
 
-  return province
+  return formatProvince(province)
 }
 
 export const getProvinceBySlug = async (provinceSlug) => {
@@ -29,7 +35,7 @@ export const getProvinceBySlug = async (provinceSlug) => {
     throw new NotFoundError('Province not found')
   }
 
-  return province
+  return formatProvince(province)
 }
 
 export const getProvinceDistricts = async (provinceSlug, pagination) => {
@@ -46,6 +52,6 @@ export const getProvinceDistricts = async (provinceSlug, pagination) => {
     province_name: province.name,
     province_slug: province.province_slug,
     count:         districts.count,
-    data:          districts.data
+    data:          districts.data.map(formatDistrict)
   }
 }

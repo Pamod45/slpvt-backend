@@ -6,13 +6,30 @@
 import db from '../../db/postgres.js'
 
 export const findAll = async (pagination) => {
-  const { offset, limit, sort_by, order } = pagination
+  const { name, offset, limit, sort_by, order } = pagination
 
-  const total = await db('divisional_secretariats').count('ds_division_id as count').first()
+  const totalQuery = db('divisional_secretariats').count('ds_division_id as count').first()
+  const dataQuery = db('divisional_secretariats as ds')
+    .leftJoin('districts as d', 'ds.district_id', 'd.district_id')
+    .leftJoin('provinces as p', 'd.province_id', 'p.province_id')
+    .select(
+      'ds.ds_division_slug',
+      'ds.name',
+      'd.district_slug',
+      'd.name as district_name',
+      'p.province_slug',
+      'p.name as province_name'
+    )
 
-  const data = await db('divisional_secretariats')
-    .select('ds_division_id', 'district_id', 'name', 'ds_division_slug', 'created_at', 'updated_at')
-    .orderBy(sort_by, order)
+  if (name) {
+    totalQuery.where('name', 'ilike', `%${name}%`)
+    dataQuery.where('ds.name', 'ilike', `%${name}%`)
+  }
+
+  const total = await totalQuery
+
+  const data = await dataQuery
+    .orderBy(`ds.${sort_by}`, order)
     .limit(limit)
     .offset(offset)
 
@@ -23,8 +40,19 @@ export const findAll = async (pagination) => {
 }
 
 export const findBySlug = async (dsSlug) => {
-  return db('divisional_secretariats')
-    .where({ ds_division_slug: dsSlug.toLowerCase() })
-    .select('ds_division_id', 'district_id', 'name', 'ds_division_slug', 'created_at', 'updated_at')
+  return db('divisional_secretariats as ds')
+    .leftJoin('districts as d', 'ds.district_id', 'd.district_id')
+    .leftJoin('provinces as p', 'd.province_id', 'p.province_id')
+    .where({ 'ds.ds_division_slug': dsSlug.toLowerCase() })
+    .select(
+      'ds.ds_division_id',
+      'ds.district_id',
+      'ds.ds_division_slug',
+      'ds.name',
+      'd.district_slug',
+      'd.name as district_name',
+      'p.province_slug',
+      'p.name as province_name'
+    )
     .first()
 }

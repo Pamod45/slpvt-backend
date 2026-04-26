@@ -13,6 +13,12 @@ export const up = function (knex) {
       .defaultTo(knex.raw('gen_random_uuid()'))
 
     table
+      .string('driver_reference_id', 15)
+      .notNullable()
+      .unique()
+      .comment('Official DMT reference ID for the driver, used for cross-referencing with DMT records')
+
+    table
       .string('first_name', 100)
       .notNullable()
 
@@ -47,6 +53,12 @@ export const up = function (knex) {
       .comment('Current law enforcement status of the driver')
 
     table.timestamps(true, true)
+
+    table
+      .timestamp('deleted_at')
+      .nullable()
+      .defaultTo(null)
+      .comment('Soft delete timestamp — null means active, set to deletion time when deactivated')
   })
 }
 

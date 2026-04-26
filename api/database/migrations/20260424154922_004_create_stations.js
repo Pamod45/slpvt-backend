@@ -66,6 +66,12 @@ export const up = function (knex) {
       .comment('Station location longitude')
 
     table.timestamps(true, true)
+
+    table
+      .timestamp('deleted_at')
+      .nullable()
+      .defaultTo(null)
+      .comment('Soft delete timestamp — null means active, set to deletion time when deactivated')
   })
 }
 

@@ -13,19 +13,15 @@ import db from '../../db/postgres.js'
 
 export const findUserByBadgeNumber = async (badgeNumber) => {
   return db('users')
-    .where({
-      badge_number: badgeNumber,
-      is_active:    true
-    })
+    .where({ badge_number: badgeNumber })
+    .whereNull('deleted_at')
     .first()
 }
 
 export const findUserById = async (userId) => {
   return db('users')
-    .where({
-      user_id:   userId,
-      is_active: true
-    })
+    .where({ user_id: userId })
+    .whereNull('deleted_at')
     .first()
 }
 
@@ -38,10 +34,8 @@ export const findUserById = async (userId) => {
 export const findUserWithStation = async (userId) => {
   return db('users as u')
     .leftJoin('stations as st', 'u.assigned_station_id', 'st.station_id')
-    .where({
-      'u.user_id':   userId,
-      'u.is_active': true
-    })
+    .where({ 'u.user_id': userId })
+    .whereNull('u.deleted_at')
     .select(
       'u.user_id',
       'u.badge_number',
