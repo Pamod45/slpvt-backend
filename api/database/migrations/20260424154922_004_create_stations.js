@@ -50,6 +50,12 @@ export const up = function (knex) {
       .nullable()
 
     table
+      .string('short_code', 10)
+      .notNullable()
+      .unique()
+      .comment('Short code for the station e.g. COL-001, KAN-001')
+
+    table
       .decimal('latitude', 10, 7)
       .nullable()
       .comment('Station location latitude')
@@ -60,6 +66,12 @@ export const up = function (knex) {
       .comment('Station location longitude')
 
     table.timestamps(true, true)
+
+    table
+      .timestamp('deleted_at')
+      .nullable()
+      .defaultTo(null)
+      .comment('Soft delete timestamp — null means active, set to deletion time when deactivated')
   })
 }
 

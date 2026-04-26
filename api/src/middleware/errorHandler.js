@@ -34,9 +34,9 @@ const errorHandler = (err, req, res, next) => {
 
   // Joi validation error — thrown by validate middleware
   if (err.isJoi || err.name === 'ValidationError') {
-    return res.status(400).json(
+    return res.status(422).json(
       error(
-        400,
+        422,
         'Validation failed',
         'One or more fields in the request are invalid',
         err.details?.map(d => ({

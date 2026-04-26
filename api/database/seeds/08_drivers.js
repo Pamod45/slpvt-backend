@@ -74,6 +74,7 @@ export const seed = async function (knex) {
     const lastName = getRandom(sriLankanLastNames)
 
     drivers.push({
+      driver_reference_id:    `DRV${String(i + 1).padStart(5, '0')}`,
       first_name:             firstName,
       last_name:              lastName,
       permanent_address:      getRandom(addresses),

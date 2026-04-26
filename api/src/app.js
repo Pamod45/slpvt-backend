@@ -11,12 +11,25 @@ import router from './routes/index.js'
 
 const app = express()
 
+// Enable strict routing so /resources and /resources/ are treated differently
+app.set('strict routing', true)
+
 connectMongo()
 
 app.use(helmet())
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
+
+// redirect trailing slashes to non-trailing slashes (except root /)
+app.use((req, res, next) => {
+  if (req.path.endsWith('/') && req.path.length > 1) {
+    const query = req.url.slice(req.path.length)
+    const newUrl = req.path.slice(0, -1) + query
+    return res.redirect(301, newUrl)
+  }
+  next()
+})
 
 // mount all routes under /api/v1
 app.use('/api/v1', router)

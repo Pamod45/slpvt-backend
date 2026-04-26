@@ -35,7 +35,7 @@ export const seed = async function (knex) {
       last_name:           'Perera',
       system_role:         'SUPER_ADMIN',
       assigned_station_id: s['Police Headquarters'],
-      is_active:           true
+      deleted_at:          null
     },
     {
       badge_number:        'SLP-00002',
@@ -44,7 +44,7 @@ export const seed = async function (knex) {
       last_name:           'Silva',
       system_role:         'PROVINCIAL_COMMANDER',
       assigned_station_id: s['Western Province Range Office'],
-      is_active:           true
+      deleted_at:          null
     },
     {
       badge_number:        'SLP-00003',
@@ -53,7 +53,7 @@ export const seed = async function (knex) {
       last_name:           'Fernando',
       system_role:         'PROVINCIAL_OFFICER',
       assigned_station_id: s['Western Province Range Office'],
-      is_active:           true
+      deleted_at:          null
     },
     {
       badge_number:        'SLP-00004',
@@ -62,7 +62,7 @@ export const seed = async function (knex) {
       last_name:           'Rajapaksa',
       system_role:         'DISTRICT_COMMANDER',
       assigned_station_id: s['Colombo Division Office'],
-      is_active:           true
+      deleted_at:          null
     },
     {
       badge_number:        'SLP-00005',
@@ -71,7 +71,7 @@ export const seed = async function (knex) {
       last_name:           'Perera',
       system_role:         'DISTRICT_OFFICER',
       assigned_station_id: s['Colombo Division Office'],
-      is_active:           true
+      deleted_at:          null
     },
     {
       badge_number:        'SLP-00006',
@@ -80,7 +80,7 @@ export const seed = async function (knex) {
       last_name:           'Jayawardena',
       system_role:         'STATION_COMMANDER',
       assigned_station_id: s['Colombo Police Post'],
-      is_active:           true
+      deleted_at:          null
     },
     {
       badge_number:        'SLP-00007',
@@ -89,7 +89,7 @@ export const seed = async function (knex) {
       last_name:           'Wickramasinghe',
       system_role:         'STATION_OFFICER',
       assigned_station_id: s['Colombo Police Post'],
-      is_active:           true
+      deleted_at:          null
     },
     {
       badge_number:        'SLP-00008',
@@ -98,7 +98,7 @@ export const seed = async function (knex) {
       last_name:           'Bandara',
       system_role:         'DATA_REGISTRAR',
       assigned_station_id: s['Police Headquarters'],
-      is_active:           true
+      deleted_at:          null
     }
   ])
 

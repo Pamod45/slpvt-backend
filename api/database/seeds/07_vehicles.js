@@ -138,6 +138,7 @@ export const seed = async function (knex) {
     const ds            = getDSForProvince(provinceName)
     const firstName     = getRandom(sriLankanFirstNames)
     const lastName      = getRandom(sriLankanLastNames)
+    const referrenceId     = `REF${String(i + 1).padStart(5, '0')}`
 
     let deviceId = null
     if (i < devices.length) {
@@ -146,6 +147,7 @@ export const seed = async function (knex) {
 
     vehicles.push({
       registration_number: registrationNumber,
+      vehicle_reference_id: referrenceId,
       chassis_number:      chassisNumber,
       color:               getRandom(colors),
       make_model:          makeModelList[i],

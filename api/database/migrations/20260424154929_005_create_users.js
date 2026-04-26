@@ -55,10 +55,10 @@ export const up = function (knex) {
       .comment('Determines access level and jurisdiction scope')
 
     table
-      .boolean('is_active')
-      .notNullable()
-      .defaultTo(true)
-      .comment('Soft delete flag — false means deactivated, record retained for audit')
+      .timestamp('deleted_at')
+      .nullable()
+      .defaultTo(null)
+      .comment('Soft delete timestamp — null means active, set to deletion time when deactivated')
 
     table.timestamps(true, true)
   })
