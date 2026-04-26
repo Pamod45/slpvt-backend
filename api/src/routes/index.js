@@ -29,8 +29,9 @@ router.get('/health', (req, res) => {
 // ─────────────────────────────────────────────
 
 import authRoutes       from '../modules/auth/auth.routes.js'
-// import provinceRoutes   from '../modules/provinces/province.routes.js'
-// import districtRoutes   from '../modules/districts/district.routes.js'
+import provinceRoutes   from '../modules/provinces/province.routes.js'
+import districtRoutes   from '../modules/districts/district.routes.js'
+import dsRoutes         from '../modules/divisional-secretariats/divisional-secretariat.routes.js'
 // import stationRoutes    from '../modules/stations/station.routes.js'
 // import userRoutes       from '../modules/users/user.routes.js'
 // import deviceRoutes     from '../modules/devices/device.routes.js'
@@ -39,8 +40,9 @@ import authRoutes       from '../modules/auth/auth.routes.js'
 // import locationRoutes   from '../modules/locations/location.routes.js'
 
 router.use('/auth',      authRoutes)
-// router.use('/provinces', provinceRoutes)
-// router.use('/districts', districtRoutes)
+router.use('/provinces', provinceRoutes)
+router.use('/districts', districtRoutes)
+router.use('/divisional-secretariats', dsRoutes)
 // router.use('/stations',  stationRoutes)
 // router.use('/users',     userRoutes)
 // router.use('/devices',   deviceRoutes)

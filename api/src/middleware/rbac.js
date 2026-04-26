@@ -54,6 +54,15 @@ export const requirePermission = (permission) => {
   }
 }
 
+export const requireRole = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return next(new ForbiddenError('Insufficient role for this action'))
+    }
+    next()
+  }
+}
+
 // ─────────────────────────────────────────────
 // SCOPE FILTER
 // ─────────────────────────────────────────────

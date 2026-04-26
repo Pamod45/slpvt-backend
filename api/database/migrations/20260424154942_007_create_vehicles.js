@@ -14,6 +14,12 @@ export const up = function (knex) {
       .defaultTo(knex.raw('gen_random_uuid()'))
 
     table
+      .string('vehicle_reference_id', 15)
+      .notNullable()
+      .unique()
+      .comment('Official DMT reference ID for the vehicle, used for cross-referencing with DMT records')
+
+    table
       .string('registration_number', 20)
       .notNullable()
       .unique()

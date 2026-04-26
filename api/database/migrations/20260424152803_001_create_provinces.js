@@ -16,6 +16,13 @@ export const up = function (knex) {
       .notNullable()
       .unique()
 
+    table
+      .string('province_slug', 100)
+      .notNullable()
+      .unique()
+      .defaultTo('')
+      .comment('URL friendly identifier e.g. north-western')
+
     table.timestamps(true, true)
   })
 }

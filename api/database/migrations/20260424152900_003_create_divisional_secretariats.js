@@ -18,6 +18,13 @@ export const up = function (knex) {
       .notNullable()
       .unique()
 
+    table
+      .string('ds_division_slug', 100)
+      .notNullable()
+      .unique()
+      .defaultTo('')
+      .comment('URL friendly identifier`')
+
     table.timestamps(true, true)
   })
 }

@@ -10,7 +10,11 @@
  */
 export const paginated = (req, data, count, pagination) => {
   const { offset, limit } = pagination
-  const baseUrl = `${req.baseUrl}${req.path}`
+  
+  // Combine baseUrl and path, then remove any trailing slash to keep consistent URLs
+  const rawUrl = `${req.baseUrl}${req.path}`
+  const baseUrl = rawUrl.endsWith('/') ? rawUrl.slice(0, -1) : rawUrl
+
   const query = { ...req.query }
 
   const nextOffset = offset + limit

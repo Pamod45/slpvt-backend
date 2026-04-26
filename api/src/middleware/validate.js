@@ -32,7 +32,7 @@ export const validateBody = (schema) => {
     }
 
     // replace body with validated and sanitised value
-    req.body = value
+    Object.assign(req.body, value);
     next()
   }
 }
@@ -54,20 +54,21 @@ export const validateQuery = (schema) => {
         field:   d.context?.key || null,
         message: d.message.replace(/['"]/g, '')
       }))
+      console.log("Validation Error:", error.details);
 
       return next(
         new ValidationError('Invalid query parameters', errors)
       )
     }
 
-    req.query = value
+    Object.assign(req.query, value);
     next()
   }
 }
 
 // ─────────────────────────────────────────────
 // VALIDATE PARAMS
-// used for path parameters like :vehicle-id
+// used for path parameters like :vehicleId
 // ─────────────────────────────────────────────
 
 export const validateParams = (schema) => {
@@ -88,7 +89,7 @@ export const validateParams = (schema) => {
       )
     }
 
-    req.params = value
+    Object.assign(req.params, value);
     next()
   }
 }

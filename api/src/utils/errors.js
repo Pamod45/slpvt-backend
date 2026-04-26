@@ -16,7 +16,7 @@ export class AppError extends Error {
 
 export class ValidationError extends AppError {
   constructor (message, errors = []) {
-    super(message, 400)
+    super(message, 422)
     this.errors = errors
   }
 }

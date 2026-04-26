@@ -5,7 +5,7 @@
  * Applied at route level not globally
  */
 
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 import { error } from '../utils/response.js'
 
 // ─────────────────────────────────────────────
@@ -25,62 +25,48 @@ const rateLimitHandler = (req, res) => {
 
 // ─────────────────────────────────────────────
 // AUTH LIMITER
-// strict — prevents brute force login attempts
-// 10 attempts per 15 minutes per IP
 // ─────────────────────────────────────────────
-
 export const authLimiter = rateLimit({
   windowMs:          15 * 60 * 1000,
   max:               10,
   standardHeaders:   true,
   legacyHeaders:     false,
   handler:           rateLimitHandler,
-  keyGenerator:      (req) => req.ip
+  keyGenerator:      (req, res) => ipKeyGenerator(req, res) || req.ip
 })
 
 // ─────────────────────────────────────────────
 // STANDARD API LIMITER
-// general endpoints — vehicles, drivers, stations etc
-// 100 requests per minute per user
 // ─────────────────────────────────────────────
-
 export const standardLimiter = rateLimit({
   windowMs:          60 * 1000,
   max:               100,
   standardHeaders:   true,
   legacyHeaders:     false,
   handler:           rateLimitHandler,
-  keyGenerator:      (req) => req.user?.user_id || req.ip
+  keyGenerator: (req) => req.user?.user_id || ipKeyGenerator(req)
 })
 
 // ─────────────────────────────────────────────
 // LOCATION QUERY LIMITER
-// heavy queries — area movement, history
-// stricter limit to protect MongoDB
-// 30 requests per minute per user
 // ─────────────────────────────────────────────
-
 export const locationLimiter = rateLimit({
   windowMs:          60 * 1000,
   max:               30,
   standardHeaders:   true,
   legacyHeaders:     false,
   handler:           rateLimitHandler,
-  keyGenerator:      (req) => req.user?.user_id || req.ip
+  keyGenerator: (req) => req.user?.user_id || ipKeyGenerator(req)
 })
 
 // ─────────────────────────────────────────────
 // DEVICE PING LIMITER
-// high volume — devices ping frequently
-// 200 requests per minute per device
-// keyed by device_id not IP
 // ─────────────────────────────────────────────
-
 export const pingLimiter = rateLimit({
   windowMs:          60 * 1000,
   max:               200,
   standardHeaders:   true,
   legacyHeaders:     false,
   handler:           rateLimitHandler,
-  keyGenerator:      (req) => req.device?.device_id || req.ip
+  keyGenerator: (req) => req.user?.user_id || ipKeyGenerator(req)
 })
