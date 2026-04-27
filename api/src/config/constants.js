@@ -33,6 +33,7 @@ export const ROLE_PERMISSIONS = {
   PROVINCIAL_COMMANDER: [
     'provinces:read',
     'districts:read',
+    'divisional_secretariats:read',
     'stations:read',
     'vehicles:read',
     'vehicles:flag-stolen',
@@ -40,6 +41,7 @@ export const ROLE_PERMISSIONS = {
     'vehicles:location:read',
     'vehicles:history:read',
     'drivers:read',
+    'drivers:update-status',
     'locations:area-read',
     'devices:read',
     'devices:create',
@@ -53,6 +55,7 @@ export const ROLE_PERMISSIONS = {
   PROVINCIAL_OFFICER: [
     'provinces:read',
     'districts:read',
+    'divisional_secretariats:read',
     'stations:read',
     'vehicles:read',
     'vehicles:flag-stolen',
@@ -60,6 +63,7 @@ export const ROLE_PERMISSIONS = {
     'vehicles:location:read',
     'vehicles:history:read',
     'drivers:read',
+    'drivers:update-status',
     'locations:area-read',
     'devices:read',
     'devices:create',
@@ -69,13 +73,16 @@ export const ROLE_PERMISSIONS = {
   DISTRICT_COMMANDER: [
     'provinces:read',
     'districts:read',
+    'divisional_secretariats:read',
     'stations:read',
+    'devices:read',
     'vehicles:read',
     'vehicles:flag-stolen',
     'vehicles:clear-status',
     'vehicles:location:read',
     'vehicles:history:read',
     'drivers:read',
+    'drivers:update-status',
     'locations:area-read',
     'users:read',
     'users:create',
@@ -86,26 +93,32 @@ export const ROLE_PERMISSIONS = {
   DISTRICT_OFFICER: [
     'provinces:read',
     'districts:read',
+    'divisional_secretariats:read',
     'stations:read',
+    'devices:read',
     'vehicles:read',
     'vehicles:flag-stolen',
     'vehicles:clear-status',
     'vehicles:location:read',
     'vehicles:history:read',
     'drivers:read',
+    'drivers:update-status',
     'locations:area-read'
   ],
 
   STATION_COMMANDER: [
     'provinces:read',
     'districts:read',
+    'divisional_secretariats:read',
     'stations:read',
+    'devices:read',
     'vehicles:read',
     'vehicles:flag-stolen',
     'vehicles:clear-status',
     'vehicles:location:read',
     'vehicles:history:read',
     'drivers:read',
+    'drivers:update-status',
     'locations:area-read',
     'users:read',
     'users:create',
@@ -116,13 +129,16 @@ export const ROLE_PERMISSIONS = {
   STATION_OFFICER: [
     'provinces:read',
     'districts:read',
+    'divisional_secretariats:read',
     'stations:read',
+    'devices:read',
     'vehicles:read',
     'vehicles:flag-stolen',
     'vehicles:clear-status',
     'vehicles:location:read',
     'vehicles:history:read',
     'drivers:read',
+    'drivers:update-status',
     'locations:area-read'
   ],
 
@@ -192,7 +208,7 @@ export const SCOPE_TYPES = {
 export const SCOPE_TO_STATION_TYPE = {
   country:    'Police Headquarters',
   province:   'Range Office',
-  district:   ' ',
+  district:   'Division Office',
   divisional: 'Police Post'
 }
 

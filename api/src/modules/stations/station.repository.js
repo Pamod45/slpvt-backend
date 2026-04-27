@@ -18,6 +18,9 @@ const BASE_QUERY = () =>
       'stations.contact_number',
       'stations.latitude',
       'stations.longitude',
+      'stations.ds_division_id',
+      db.raw('COALESCE(ds.district_id, stations.district_id) as resolved_district_id'),
+      db.raw('COALESCE(d.province_id,  stations.province_id) as resolved_province_id'),
       'ds.name as ds_division_name',
       'ds.ds_division_slug',
       'd.name as district_name',
@@ -98,4 +101,22 @@ export const update = async (stationId, stationData) => {
     .returning('*')
 
   return updatedStation
+}
+
+export const findUsersByStation = async (stationId, pagination) => {
+  const { offset, limit, sort_by, order } = pagination
+  
+  const total = await db('users').where({ assigned_station_id: stationId, deleted_at: null }).count('user_id as count').first()
+
+  const data = await db('users')
+    .where({ assigned_station_id: stationId, deleted_at: null })
+    .select('user_id', 'badge_number', 'first_name', 'last_name', 'system_role', 'created_at', 'updated_at')
+    .orderBy(sort_by, order)
+    .limit(limit)
+    .offset(offset)
+
+  return {
+    count: parseInt(total.count),
+    data
+  }
 }

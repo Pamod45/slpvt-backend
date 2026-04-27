@@ -53,6 +53,13 @@ export const createStationSchema = Joi.object({
   longitude: Joi.number().min(-180).max(180).optional().allow(null)
 })
 
+export const stationUsersQuerySchema = Joi.object({
+  offset:  Joi.number().integer().min(0).default(0),
+  limit:   Joi.number().integer().min(1).max(100).default(20),
+  sort_by: Joi.string().valid('badge_number', 'first_name', 'last_name', 'created_at').default('created_at'),
+  order:   Joi.string().valid('asc', 'desc').default('desc')
+})
+
 export const updateStationSchema = Joi.object({
   name: Joi.string().max(150).optional(),
   short_code: Joi.string().max(10).optional(),

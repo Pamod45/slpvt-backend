@@ -13,6 +13,7 @@ import { standardLimiter } from '../../middleware/rateLimiter.js'
 import {
   stationShortCodeParamsSchema,
   stationQuerySchema,
+  stationUsersQuerySchema,
   createStationSchema,
   updateStationSchema
 } from './station.validator.js'
@@ -59,6 +60,18 @@ router.put(
   validateBody(updateStationSchema),
   stationController.update
 )
+
+// GET /api/v1/stations/:shortCode/users
+router.get(
+  '/:shortCode/users',
+  standardLimiter,
+  verifyJWT,
+  requirePermission('users:read'),
+  validateParams(stationShortCodeParamsSchema),
+  validateQuery(stationUsersQuerySchema),
+  stationController.getUsers
+)
+
 
 // DELETE /api/v1/stations/:shortCode
 router.delete(

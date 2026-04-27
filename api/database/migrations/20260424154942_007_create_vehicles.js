@@ -79,7 +79,7 @@ export const up = function (knex) {
       .references('ds_division_id')
       .inTable('divisional_secretariats')
       .onDelete('RESTRICT')
-      .comment('DS division this station belongs to')
+      .comment('DS division this vehicle belongs to')
 
     table.timestamps(true, true)
 

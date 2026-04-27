@@ -33,10 +33,10 @@ export const verifyJWT = (req, res, next) => {
 
     const decoded = jwt.verify(token, env.jwt.secret)
 
-    // attach decoded payload to request
-    // all boundary IDs are embedded in JWT at login time
+
     req.user = {
       user_id:             decoded.sub,
+      badge_number:        decoded.badge_number,
       role:                decoded.role,
       assigned_station_id: decoded.assigned_station_id || null,
       ds_division_id:      decoded.ds_division_id      || null,
@@ -89,7 +89,6 @@ export const verifyDeviceKey = async (req, res, next) => {
       throw new UnauthorizedError('Device is currently under repair')
     }
 
-    // attach device to request
     req.device = {
       device_id:     device.device_id,
       serial_number: device.serial_number,
