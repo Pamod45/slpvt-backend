@@ -27,9 +27,6 @@ import logger from '../../utils/logger.js'
 
 // ─────────────────────────────────────────────
 // BUILD JWT PAYLOAD
-// joins user to station to get boundary IDs
-// embeds scope in token so middleware never
-// needs a DB call to determine scope
 // ─────────────────────────────────────────────
 
 const buildTokenPayload = async (userId) => {
@@ -41,6 +38,7 @@ const buildTokenPayload = async (userId) => {
 
   return {
     sub:                 user.user_id,
+    badge_number:        user.badge_number,
     role:                user.system_role,
     assigned_station_id: user.assigned_station_id || null,
     ds_division_id:      user.ds_division_id      || null,
@@ -70,15 +68,12 @@ const getRefreshTokenExpiry = () => {
 // ─────────────────────────────────────────────
 
 export const login = async (badgeNumber, password) => {
-  // find user by badge number
   const user = await findUserByBadgeNumber(badgeNumber)
 
   if (!user) {
-    // use generic message — do not reveal whether badge number exists
     throw new UnauthorizedError('Invalid badge number or password')
   }
 
-  // verify password against bcrypt hash
   const passwordValid = await bcrypt.compare(password, user.password_hash)
 
   if (!passwordValid) {
@@ -91,13 +86,10 @@ export const login = async (badgeNumber, password) => {
     role:         user.system_role
   })
 
-  // build payload with boundary scope from station
   const payload = await buildTokenPayload(user.user_id)
 
-  // generate access token
   const accessToken = generateAccessToken(payload)
 
-  // generate and store refresh token
   const expiresAt    = getRefreshTokenExpiry()
   const refreshToken = await createRefreshToken(user.user_id, expiresAt)
 
@@ -129,40 +121,32 @@ export const refresh = async (rawRefreshToken) => {
     throw new UnauthorizedError('Invalid refresh token')
   }
 
-  // reuse detection — token already used means possible theft
   if (tokenRecord.is_used) {
     logger.warn('Refresh token reuse detected — invalidating all user tokens', {
       user_id:  tokenRecord.user_id,
       token_id: tokenRecord.token_id
     })
-    // invalidate all tokens for this user immediately
     await deleteAllUserTokens(tokenRecord.user_id)
     throw new UnauthorizedError('Refresh token has already been used. Please log in again.')
   }
 
-  // check token has not expired
   if (new Date() > new Date(tokenRecord.expires_at)) {
     await deleteRefreshToken(tokenRecord.token_id)
     throw new UnauthorizedError('Refresh token has expired. Please log in again.')
   }
 
-  // mark old token as used — rotation
   await markTokenAsUsed(tokenRecord.token_id)
 
-  // verify user still exists and is active
   const user = await findUserById(tokenRecord.user_id)
 
   if (!user) {
     throw new UnauthorizedError('User account is no longer active')
   }
 
-  // build fresh payload — picks up any role or scope changes
   const payload = await buildTokenPayload(user.user_id)
 
-  // issue new access token
   const accessToken = generateAccessToken(payload)
 
-  // issue new refresh token — rotation complete
   const expiresAt       = getRefreshTokenExpiry()
   const newRefreshToken = await createRefreshToken(user.user_id, expiresAt)
 
@@ -186,8 +170,6 @@ export const logout = async (rawRefreshToken) => {
   const tokenRecord = await findRefreshToken(rawRefreshToken)
 
   if (!tokenRecord) {
-    // token not found — already logged out or invalid
-    // return success anyway — idempotent logout
     return
   }
 

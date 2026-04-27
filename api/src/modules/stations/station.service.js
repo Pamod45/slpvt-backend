@@ -8,8 +8,35 @@ import * as provinceRepository from '../provinces/province.repository.js'
 import * as districtRepository from '../districts/district.repository.js'
 import * as dsRepository from '../divisional-secretariats/divisional-secretariat.repository.js'
 import { format } from './station.presenter.js'
-import { NotFoundError, ConflictError } from '../../utils/errors.js'
+import { NotFoundError, ConflictError, ForbiddenError } from '../../utils/errors.js'
 import { STATION_TYPES } from '../../config/constants.js'
+
+const checkStationScope = (user, station) => {
+  const { role, assigned_station_id, district_id, province_id } = user
+
+  if (role === 'SUPER_ADMIN') return
+
+  if (role === 'PROVINCIAL_COMMANDER') {
+    if (station.resolved_province_id !== province_id) {
+      throw new ForbiddenError('This station is outside your province')
+    }
+    return
+  }
+
+  if (role === 'DISTRICT_COMMANDER') {
+    if (station.resolved_district_id !== district_id) {
+      throw new ForbiddenError('This station is outside your district')
+    }
+    return
+  }
+
+  if (role === 'STATION_COMMANDER') {
+    if (station.station_id !== assigned_station_id) {
+      throw new ForbiddenError('You can only view users at your assigned station')
+    }
+    return
+  }
+}
 
 const resolveLocationIds = async (data) => {
   const result = { ...data }
@@ -143,3 +170,24 @@ export const deleteStation = async (shortCode) => {
 
   await stationRepository.softDelete(station.station_id)
 }
+
+export const getStationUsers = async (shortCode, pagination, user) => {
+  const station = await stationRepository.findByShortCode(shortCode)
+
+  if (!station) {
+    throw new NotFoundError('Station not found')
+  }
+
+  checkStationScope(user, station)
+
+  const result = await stationRepository.findUsersByStation(station.station_id, pagination)
+
+  return {
+    station_id: station.station_id,
+    short_code: station.short_code,
+    name:       station.name,
+    count:      result.count,
+    data:       result.data
+  }
+}
+
