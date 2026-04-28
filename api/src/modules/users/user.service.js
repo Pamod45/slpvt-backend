@@ -86,6 +86,12 @@ export const createUser = async (data, executorRole) => {
   const hashed = await bcrypt.hash(data.password, salt)
 
   const insertData = { ...data, password_hash: hashed }
+
+  if (insertData.system_role === 'DATA_REGISTRAR') {
+    if (!insertData.first_name) insertData.first_name = 'Service'
+    if (!insertData.last_name)  insertData.last_name  = 'Account'
+  }
+
   const station = data.station_short_code ? await findStationByShortCode(data.station_short_code) : null
   if (data.station_short_code && !station) throw new NotFoundError('Station not found')
   checkRoleStationMatch(data.system_role, station?.station_type ?? null)
@@ -106,7 +112,7 @@ export const updateUser = async (badgeNumber, data, executor) => {
   const isSelf = executor.badge_number === targetUser.badge_number
 
   if (isSelf) {
-    if (data.system_role || data.assigned_station_id || data.deleted_at !== undefined) {
+    if (data.system_role || data.assigned_station_id || data.deleted_at !== undefined || data.station_short_code !== undefined) {
       throw new ForbiddenError('You can only update your first name and last name')
     }
   } else {

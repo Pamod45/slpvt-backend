@@ -36,6 +36,7 @@ router.get(
 router.get(
   '/:badgeNumber',
   standardLimiter,
+  requirePermission('users:read'),
   validateParams(userParamsSchema),
   userController.getByBadge
 )

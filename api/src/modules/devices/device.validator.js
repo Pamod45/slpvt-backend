@@ -4,7 +4,7 @@ import { DEVICE_ADMIN_STATUS } from '../../config/constants.js'
 const validStatuses = Object.values(DEVICE_ADMIN_STATUS)
 
 export const deviceParamsSchema = Joi.object({
-  deviceId: Joi.string().uuid().required()
+  serialNumber: Joi.string().max(100).required()
 })
 
 export const deviceQuerySchema = Joi.object({
@@ -23,7 +23,5 @@ export const createDeviceSchema = Joi.object({
 })
 
 export const updateDeviceSchema = Joi.object({
-  serial_number: Joi.string().max(100).optional(),
-  issued_date:   Joi.date().iso().optional(),
-  admin_status:  Joi.string().valid(...validStatuses).optional()
-}).min(1)
+  admin_status: Joi.string().valid(...validStatuses).required()
+})

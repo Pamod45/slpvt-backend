@@ -14,7 +14,7 @@ const validStationTypes = Object.values(STATION_TYPES)
 
 export const stationQuerySchema = Joi.object({
   name:           Joi.string().optional().allow(''),
-  'station-type': Joi.string().valid(...validStationTypes).optional().allow(''),
+  station_type: Joi.string().valid(...validStationTypes).optional().allow(''),
   offset:         Joi.number().integer().min(0).default(0),
   limit:          Joi.number().integer().min(1).max(100).default(20),
   sort_by:        Joi.string().valid('name', 'short_code', 'created_at', 'station_type').default('name'),

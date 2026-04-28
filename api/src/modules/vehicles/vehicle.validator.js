@@ -4,12 +4,12 @@ import { VEHICLE_POLICE_STATUS } from '../../config/constants.js'
 const validStatuses = Object.values(VEHICLE_POLICE_STATUS)
 
 export const vehicleParamsSchema = Joi.object({
-  vehicleId: Joi.string().uuid().required()
+  registrationNumber: Joi.string().max(20).required()
 })
 
 export const assignmentParamsSchema = Joi.object({
-  vehicleId:    Joi.string().uuid().required(),
-  assignmentId: Joi.string().uuid().required()
+  registrationNumber: Joi.string().max(20).required(),
+  licenseNumber:      Joi.string().max(50).required()
 })
 
 export const vehicleQuerySchema = Joi.object({
@@ -54,8 +54,8 @@ export const updateVehicleSchema = Joi.object({
 }).min(1)
 
 export const createAssignmentSchema = Joi.object({
-  driver_id:     Joi.string().uuid().required(),
-  assigned_date: Joi.date().iso().required()
+  license_number: Joi.string().max(50).required(),
+  assigned_date:  Joi.date().iso().required()
 })
 
 export const closeAssignmentSchema = Joi.object({

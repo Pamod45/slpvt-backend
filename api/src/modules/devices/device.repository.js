@@ -4,9 +4,7 @@ const SAFE_COLUMNS = [
   'device_id',
   'serial_number',
   'issued_date',
-  'admin_status',
-  'created_at',
-  'updated_at'
+  'admin_status'
 ]
 
 export const findAll = async (pagination) => {
@@ -20,7 +18,7 @@ export const findAll = async (pagination) => {
   const total = await query.clone().count('device_id as count').first()
 
   const data = await query
-    .select(SAFE_COLUMNS)
+    .select(['serial_number', 'issued_date', 'admin_status'])
     .orderBy(sort_by, order)
     .limit(limit)
     .offset(offset)

@@ -28,11 +28,11 @@ router.get(
 )
 
 router.get(
-  '/:vehicleId',
+  '/:registrationNumber',
   standardLimiter,
   requirePermission('vehicles:read'),
   validateParams(vehicleParamsSchema),
-  vehicleController.getById
+  vehicleController.getByRegistrationNumber
 )
 
 router.post(
@@ -44,7 +44,7 @@ router.post(
 )
 
 router.patch(
-  '/:vehicleId',
+  '/:registrationNumber',
   standardLimiter,
   requirePermission('vehicles:flag-stolen'),
   validateParams(vehicleParamsSchema),
@@ -53,7 +53,7 @@ router.patch(
 )
 
 router.get(
-  '/:vehicleId/assignments',
+  '/:registrationNumber/assignments',
   standardLimiter,
   requirePermission('vehicles:read'),
   validateParams(vehicleParamsSchema),
@@ -62,7 +62,7 @@ router.get(
 )
 
 router.post(
-  '/:vehicleId/assignments',
+  '/:registrationNumber/assignments',
   standardLimiter,
   requirePermission('assignments:create'),
   validateParams(vehicleParamsSchema),
@@ -71,7 +71,7 @@ router.post(
 )
 
 router.patch(
-  '/:vehicleId/assignments/:assignmentId',
+  '/:registrationNumber/assignments/:licenseNumber',
   standardLimiter,
   requirePermission('assignments:update'),
   validateParams(assignmentParamsSchema),

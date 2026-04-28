@@ -1,14 +1,16 @@
 import * as driverRepository from './driver.repository.js'
 import { NotFoundError, ConflictError } from '../../utils/errors.js'
 
+const format = ({ driver_id, driver_reference_id, created_at, updated_at, deleted_at, ...rest }) => rest
+
 export const listDrivers = async (filters, pagination) => {
   return driverRepository.findAll(filters, pagination)
 }
 
-export const getDriver = async (driverId) => {
-  const driver = await driverRepository.findById(driverId)
+export const getDriver = async (licenseNumber) => {
+  const driver = await driverRepository.findByLicenseNumber(licenseNumber)
   if (!driver) throw new NotFoundError('Driver not found')
-  return driver
+  return format(driver)
 }
 
 export const registerDriver = async (data) => {
@@ -23,14 +25,14 @@ export const registerDriver = async (data) => {
   return driverRepository.create(data)
 }
 
-export const updateDriverStatus = async (driverId, data) => {
-  const driver = await driverRepository.findById(driverId)
+export const updateDriverStatus = async (licenseNumber, data) => {
+  const driver = await driverRepository.findByLicenseNumber(licenseNumber)
   if (!driver) throw new NotFoundError('Driver not found')
-  return driverRepository.update(driverId, data)
+  return format(await driverRepository.update(driver.driver_id, data))
 }
 
-export const getDriverAssignments = async (driverId, pagination) => {
-  const driver = await driverRepository.findById(driverId)
+export const getDriverAssignments = async (licenseNumber, pagination) => {
+  const driver = await driverRepository.findByLicenseNumber(licenseNumber)
   if (!driver) throw new NotFoundError('Driver not found')
-  return driverRepository.findAssignmentsByDriver(driverId, pagination)
+  return driverRepository.findAssignmentsByDriver(driver.driver_id, pagination)
 }

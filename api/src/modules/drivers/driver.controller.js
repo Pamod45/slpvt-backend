@@ -5,10 +5,11 @@ import { PAGINATION } from '../../config/constants.js'
 export const list = async (req, res, next) => {
   try {
     const filters = {
-      license_number:  req.query.license_number?.trim()  || undefined,
-      first_name:      req.query.first_name?.trim()      || undefined,
-      last_name:       req.query.last_name?.trim()       || undefined,
-      police_status:   req.query.police_status           || undefined,
+      license_number:  req.query.license_number?.trim() || undefined,
+      reference_id:    req.query.reference_id?.trim()   || undefined,
+      first_name:      req.query.first_name?.trim()     || undefined,
+      last_name:       req.query.last_name?.trim()      || undefined,
+      police_status:   req.query.police_status          || undefined,
       license_expired: req.query.license_expired
     }
 
@@ -27,7 +28,7 @@ export const list = async (req, res, next) => {
 
 export const getById = async (req, res, next) => {
   try {
-    const driver = await driverService.getDriver(req.params['driverId'])
+    const driver = await driverService.getDriver(req.params['licenseNumber'])
     res.status(200).json(single(driver))
   } catch (err) { next(err) }
 }
@@ -41,7 +42,7 @@ export const register = async (req, res, next) => {
 
 export const updateStatus = async (req, res, next) => {
   try {
-    const driver = await driverService.updateDriverStatus(req.params['driverId'], req.body)
+    const driver = await driverService.updateDriverStatus(req.params['licenseNumber'], req.body)
     res.status(200).json(success('Driver status updated successfully', driver))
   } catch (err) { next(err) }
 }
@@ -56,7 +57,7 @@ export const listAssignments = async (req, res, next) => {
       order:       req.query.order   || 'desc'
     }
 
-    const result = await driverService.getDriverAssignments(req.params['driverId'], pagination)
+    const result = await driverService.getDriverAssignments(req.params['licenseNumber'], pagination)
 
     res.status(200).set('X-Total-Count', result.count).json(paginated(req, result.data, result.count, pagination))
   } catch (err) { next(err) }

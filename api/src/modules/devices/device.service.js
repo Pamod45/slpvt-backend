@@ -13,8 +13,8 @@ export const listDevices = async (pagination) => {
   return deviceRepository.findAll(pagination)
 }
 
-export const getDevice = async (deviceId) => {
-  const device = await deviceRepository.findById(deviceId)
+export const getDevice = async (serialNumber) => {
+  const device = await deviceRepository.findBySerialNumber(serialNumber)
   if (!device) throw new NotFoundError('Device not found')
   return device
 }
@@ -30,14 +30,8 @@ export const provisionDevice = async (data) => {
   return { ...device, api_key: rawKey }
 }
 
-export const updateDevice = async (deviceId, data) => {
-  const device = await deviceRepository.findById(deviceId)
+export const updateDevice = async (serialNumber, data) => {
+  const device = await deviceRepository.findBySerialNumber(serialNumber)
   if (!device) throw new NotFoundError('Device not found')
-
-  if (data.serial_number && data.serial_number !== device.serial_number) {
-    const conflict = await deviceRepository.findBySerialNumber(data.serial_number)
-    if (conflict) throw new ConflictError('A device with this serial number already exists')
-  }
-
-  return deviceRepository.update(deviceId, data)
+  return deviceRepository.update(device.device_id, data)
 }

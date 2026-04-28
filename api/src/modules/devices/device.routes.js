@@ -24,11 +24,11 @@ router.get(
 )
 
 router.get(
-  '/:deviceId',
+  '/:serialNumber',
   standardLimiter,
   requirePermission('devices:read'),
   validateParams(deviceParamsSchema),
-  deviceController.getById
+  deviceController.getBySerialNumber
 )
 
 router.post(
@@ -40,7 +40,7 @@ router.post(
 )
 
 router.patch(
-  '/:deviceId',
+  '/:serialNumber',
   standardLimiter,
   requirePermission('devices:update'),
   validateParams(deviceParamsSchema),

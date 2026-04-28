@@ -19,9 +19,9 @@ export const list = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
-export const getById = async (req, res, next) => {
+export const getBySerialNumber = async (req, res, next) => {
   try {
-    const device = await deviceService.getDevice(req.params['deviceId'])
+    const device = await deviceService.getDevice(req.params['serialNumber'])
     res.status(200).json(single(device))
   } catch (err) { next(err) }
 }
@@ -35,7 +35,7 @@ export const provision = async (req, res, next) => {
 
 export const update = async (req, res, next) => {
   try {
-    const device = await deviceService.updateDevice(req.params['deviceId'], req.body)
+    const device = await deviceService.updateDevice(req.params['serialNumber'], req.body)
     res.status(200).json(success('Device updated successfully', device))
   } catch (err) { next(err) }
 }

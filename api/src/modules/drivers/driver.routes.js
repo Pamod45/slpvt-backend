@@ -25,7 +25,7 @@ router.get(
 )
 
 router.get(
-  '/:driverId',
+  '/:licenseNumber',
   standardLimiter,
   requirePermission('drivers:read'),
   validateParams(driverParamsSchema),
@@ -41,7 +41,7 @@ router.post(
 )
 
 router.patch(
-  '/:driverId',
+  '/:licenseNumber',
   standardLimiter,
   requirePermission('drivers:update-status'),
   validateParams(driverParamsSchema),
@@ -50,7 +50,7 @@ router.patch(
 )
 
 router.get(
-  '/:driverId/assignments',
+  '/:licenseNumber/assignments',
   standardLimiter,
   requirePermission('drivers:read'),
   validateParams(driverParamsSchema),

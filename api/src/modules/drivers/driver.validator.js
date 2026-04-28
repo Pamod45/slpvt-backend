@@ -4,11 +4,12 @@ import { DRIVER_POLICE_STATUS } from '../../config/constants.js'
 const validStatuses = Object.values(DRIVER_POLICE_STATUS)
 
 export const driverParamsSchema = Joi.object({
-  driverId: Joi.string().uuid().required()
+  licenseNumber: Joi.string().max(50).required()
 })
 
 export const driverQuerySchema = Joi.object({
   license_number:  Joi.string().max(50).optional(),
+  reference_id:    Joi.string().max(15).optional(),
   first_name:      Joi.string().max(100).optional(),
   last_name:       Joi.string().max(100).optional(),
   police_status:   Joi.string().valid(...validStatuses).optional(),

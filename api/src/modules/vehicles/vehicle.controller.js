@@ -29,9 +29,9 @@ export const list = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
-export const getById = async (req, res, next) => {
+export const getByRegistrationNumber = async (req, res, next) => {
   try {
-    const vehicle = await vehicleService.getVehicle(req.params['vehicleId'])
+    const vehicle = await vehicleService.getVehicle(req.params['registrationNumber'])
     res.status(200).json(single(vehicle))
   } catch (err) { next(err) }
 }
@@ -45,7 +45,7 @@ export const register = async (req, res, next) => {
 
 export const update = async (req, res, next) => {
   try {
-    const vehicle = await vehicleService.updateVehicle(req.params['vehicleId'], req.body, req.user)
+    const vehicle = await vehicleService.updateVehicle(req.params['registrationNumber'], req.body, req.user)
     res.status(200).json(success('Vehicle updated successfully', vehicle))
   } catch (err) { next(err) }
 }
@@ -60,7 +60,7 @@ export const listAssignments = async (req, res, next) => {
       order:       req.query.order   || 'desc'
     }
 
-    const result = await vehicleService.getVehicleAssignments(req.params['vehicleId'], pagination)
+    const result = await vehicleService.getVehicleAssignments(req.params['registrationNumber'], pagination)
 
     res.status(200).set('X-Total-Count', result.count).json(paginated(req, result.data, result.count, pagination))
   } catch (err) { next(err) }
@@ -68,7 +68,7 @@ export const listAssignments = async (req, res, next) => {
 
 export const createAssignment = async (req, res, next) => {
   try {
-    const assignment = await vehicleService.createAssignment(req.params['vehicleId'], req.body)
+    const assignment = await vehicleService.createAssignment(req.params['registrationNumber'], req.body)
     res.status(201).json(created(assignment))
   } catch (err) { next(err) }
 }
@@ -76,8 +76,8 @@ export const createAssignment = async (req, res, next) => {
 export const closeAssignment = async (req, res, next) => {
   try {
     const assignment = await vehicleService.closeAssignment(
-      req.params['vehicleId'],
-      req.params['assignmentId'],
+      req.params['registrationNumber'],
+      req.params['licenseNumber'],
       req.body
     )
     res.status(200).json(success('Assignment closed successfully', assignment))
