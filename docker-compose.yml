@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
+    image: postgres:16
     container_name: slpvt_postgres
     environment:
       POSTGRES_DB: slpvt_dev
@@ -14,7 +14,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   mongodb:
-    image: mongo:6
+    image: mongo:7
     container_name: slpvt_mongo
     ports:
       - "27017:27017"

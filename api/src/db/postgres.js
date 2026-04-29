@@ -15,7 +15,8 @@ const db = knex({
     database: env.pg.database,
     user:     env.pg.user,
     password: env.pg.password,
-    ssl:      env.pg.host !== 'localhost' ? { rejectUnauthorized: false } : false
+    // ssl:      env.pg.host !== 'localhost' ? { rejectUnauthorized: false } : false
+    ssl: false
   },
   pool: {
     min: 2,
