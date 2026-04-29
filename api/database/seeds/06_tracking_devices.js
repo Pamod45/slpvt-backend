@@ -10,7 +10,7 @@ import { randomBytes, createHash } from 'crypto'
 import { writeFileSync, mkdirSync } from 'fs'
 
 export const seed = async function (knex) {
-  await knex('tracking_devices').del()
+  await knex.raw('TRUNCATE TABLE tracking_devices CASCADE')
 
   const devices = []
   const deviceKeys = []
