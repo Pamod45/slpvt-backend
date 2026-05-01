@@ -12,7 +12,8 @@ import knex from 'knex'
 import knexConfig from '../knexfile.js'
 import 'dotenv/config'
 
-const db = knex(knexConfig.development)
+const env = process.env.NODE_ENV || 'development'
+const db = knex(knexConfig[env])
 
 const run = async () => {
   const mongoClient = new MongoClient(process.env.MONGO_URI)
