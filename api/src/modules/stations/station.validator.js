@@ -13,12 +13,12 @@ export const stationShortCodeParamsSchema = Joi.object({
 const validStationTypes = Object.values(STATION_TYPES)
 
 export const stationQuerySchema = Joi.object({
-  name:           Joi.string().optional().allow(''),
-  'station-type': Joi.string().valid(...validStationTypes).optional().allow(''),
-  offset:         Joi.number().integer().min(0).default(0),
-  limit:          Joi.number().integer().min(1).max(100).default(20),
-  sort_by:        Joi.string().valid('name', 'short_code', 'created_at', 'station_type').default('name'),
-  order:          Joi.string().valid('asc', 'desc').default('asc')
+  name:        Joi.string().optional().allow(''),
+  stationType: Joi.string().valid(...validStationTypes).optional().allow(''),
+  offset:      Joi.number().integer().min(0).default(0),
+  limit:       Joi.number().integer().min(1).max(100).default(20),
+  sortBy:      Joi.string().valid('name', 'short_code', 'created_at', 'station_type').default('name'),
+  order:       Joi.string().valid('asc', 'desc').default('asc')
 })
 
 export const createStationSchema = Joi.object({
@@ -54,10 +54,10 @@ export const createStationSchema = Joi.object({
 })
 
 export const stationUsersQuerySchema = Joi.object({
-  offset:  Joi.number().integer().min(0).default(0),
-  limit:   Joi.number().integer().min(1).max(100).default(20),
-  sort_by: Joi.string().valid('badge_number', 'first_name', 'last_name', 'created_at').default('created_at'),
-  order:   Joi.string().valid('asc', 'desc').default('desc')
+  offset: Joi.number().integer().min(0).default(0),
+  limit:  Joi.number().integer().min(1).max(100).default(20),
+  sortBy: Joi.string().valid('badge_number', 'first_name', 'last_name', 'created_at').default('created_at'),
+  order:  Joi.string().valid('asc', 'desc').default('desc')
 })
 
 export const updateStationSchema = Joi.object({

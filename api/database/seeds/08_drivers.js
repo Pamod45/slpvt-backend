@@ -6,7 +6,7 @@
  */
 
 export const seed = async function (knex) {
-  await knex('drivers').del()
+  await knex.raw('TRUNCATE TABLE drivers CASCADE')
 
   const sriLankanFirstNames = [
     'Nuwan', 'Kamal', 'Roshan', 'Chaminda', 'Pradeep',

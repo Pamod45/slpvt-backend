@@ -8,7 +8,7 @@
  */
 
 export const seed = async function (knex) {
-  await knex('stations').del()
+  await knex.raw('TRUNCATE TABLE stations CASCADE')
 
   const provinces = await knex('provinces').select('province_id', 'name')
   const p = {}

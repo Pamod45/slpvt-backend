@@ -8,7 +8,7 @@
  */
 
 export const seed = async function (knex) {
-  await knex('vehicles').del()
+  await knex.raw('TRUNCATE TABLE vehicles CASCADE')
 
   const devices = await knex('tracking_devices')
     .select('device_id', 'serial_number', 'admin_status')

@@ -17,7 +17,7 @@
 import bcrypt from 'bcrypt'
 
 export const seed = async function (knex) {
-  await knex('users').del()
+  await knex.raw('TRUNCATE TABLE users CASCADE')
 
   const passwordHash = await bcrypt.hash('Test@1234', 12)
 

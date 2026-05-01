@@ -8,6 +8,7 @@
 import { AppError } from '../utils/errors.js'
 import { error } from '../utils/response.js'
 import logger from '../utils/logger.js'
+import { env } from '../config/environment.js'
 
 const errorHandler = (err, req, res, next) => {
 
@@ -79,7 +80,7 @@ const errorHandler = (err, req, res, next) => {
     error(
       500,
       'Internal server error',
-      process.env.NODE_ENV === 'development' ? err.message : null
+      env.isDev ? err.message : null
     )
   )
 }

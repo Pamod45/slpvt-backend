@@ -1,5 +1,5 @@
 export const seed = async function (knex) {
-  await knex('provinces').del()
+  await knex.raw('TRUNCATE TABLE provinces CASCADE')
 
   await knex('provinces').insert([
   { name: 'Western',       province_slug: 'western'       },

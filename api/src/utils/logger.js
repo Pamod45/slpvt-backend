@@ -10,7 +10,6 @@ import { env } from '../config/environment.js'
 
 const { combine, timestamp, colorize, printf, json } = winston.format
 
-// custom format for development console output
 const devFormat = printf(({ level, message, timestamp, ...meta }) => {
   const metaStr = Object.keys(meta).length
     ? `\n${JSON.stringify(meta, null, 2)}`
@@ -23,7 +22,6 @@ const logger = winston.createLogger({
 
   transports: [
 
-    // console transport — always on
     new winston.transports.Console({
       format: env.isDev
         ? combine(
@@ -37,7 +35,6 @@ const logger = winston.createLogger({
           )
     }),
 
-    // file transport — production only
     ...(!env.isDev ? [
       new winston.transports.File({
         filename: 'logs/error.log',
@@ -52,7 +49,6 @@ const logger = winston.createLogger({
   ]
 })
 
-// HTTP request logger for Morgan
 export const httpLogger = (message) => {
   logger.http(message.trim())
 }

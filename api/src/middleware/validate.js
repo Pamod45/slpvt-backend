@@ -16,8 +16,8 @@ import { ValidationError } from '../utils/errors.js'
 export const validateBody = (schema) => {
   return (req, res, next) => {
     const { error, value } = schema.validate(req.body, {
-      abortEarly:   false,  // collect all errors not just first
-      stripUnknown: true    // remove unknown fields silently
+      abortEarly:   false, 
+      stripUnknown: true    
     })
 
     if (error) {
@@ -31,7 +31,6 @@ export const validateBody = (schema) => {
       )
     }
 
-    // replace body with validated and sanitised value
     Object.assign(req.body, value);
     next()
   }

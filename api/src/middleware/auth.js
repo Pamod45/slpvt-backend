@@ -60,6 +60,25 @@ export const verifyJWT = (req, res, next) => {
 // API KEY AUTH — for tracking devices only
 // ─────────────────────────────────────────────
 
+// Lazy in-memory cache — keyed by api_key_hash, TTL 10 minutes
+// Swap the two cache functions below for Redis when ready
+const deviceCache = new Map()
+const CACHE_TTL_MS = 10 * 60 * 1000
+
+const getCachedDevice = (hash) => {
+  const entry = deviceCache.get(hash)
+  if (!entry) return null
+  if (Date.now() > entry.expiresAt) {
+    deviceCache.delete(hash)
+    return null
+  }
+  return entry.device
+}
+
+const setCachedDevice = (hash, device) => {
+  deviceCache.set(hash, { device, expiresAt: Date.now() + CACHE_TTL_MS })
+}
+
 export const verifyDeviceKey = async (req, res, next) => {
   try {
     const rawKey = req.headers['x-device-key']
@@ -68,14 +87,17 @@ export const verifyDeviceKey = async (req, res, next) => {
       throw new UnauthorizedError('X-Device-Key header is missing')
     }
 
-    // hash the raw key and look it up in the database
-    const hashedKey = createHash('sha256')
-      .update(rawKey)
-      .digest('hex')
+    const hashedKey = createHash('sha256').update(rawKey).digest('hex')
 
-    const device = await db('tracking_devices')
-      .where({ api_key_hash: hashedKey })
-      .first()
+    let device = getCachedDevice(hashedKey)
+
+    if (!device) {
+      device = await db('tracking_devices')
+        .where({ api_key_hash: hashedKey })
+        .first()
+
+      if (device) setCachedDevice(hashedKey, device)
+    }
 
     if (!device) {
       throw new UnauthorizedError('Invalid device API key')

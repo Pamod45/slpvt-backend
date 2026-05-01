@@ -47,6 +47,7 @@ export const findBySlug = async (dsSlug) => {
     .select(
       'ds.ds_division_id',
       'ds.district_id',
+      'd.province_id',
       'ds.ds_division_slug',
       'ds.name',
       'd.district_slug',

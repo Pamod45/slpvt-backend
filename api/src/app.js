@@ -2,6 +2,7 @@ import express from 'express'
 import helmet from 'helmet'
 import cors from 'cors'
 import morgan from 'morgan'
+import { httpLogger } from './utils/logger.js'
 import 'dotenv/config'
 
 import connectMongo from './db/mongo.js'
@@ -11,14 +12,13 @@ import router from './routes/index.js'
 
 const app = express()
 
-// Enable strict routing so /resources and /resources/ are treated differently
 app.set('strict routing', true)
 
 connectMongo()
 
 app.use(helmet())
 app.use(cors())
-app.use(morgan('dev'))
+app.use(morgan('dev', { stream: { write: httpLogger } }))
 app.use(express.json())
 
 // redirect trailing slashes to non-trailing slashes (except root /)
@@ -31,10 +31,8 @@ app.use((req, res, next) => {
   next()
 })
 
-// mount all routes under /api/v1
-app.use('/api/v1', router)
+app.use('/slpvt/v1', router)
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({
     code:        404,
@@ -43,7 +41,6 @@ app.use((req, res) => {
   })
 })
 
-// global error handler — must be last
 app.use(errorHandler)
 
 export default app

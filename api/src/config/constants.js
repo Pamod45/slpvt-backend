@@ -75,7 +75,6 @@ export const ROLE_PERMISSIONS = {
     'districts:read',
     'divisional_secretariats:read',
     'stations:read',
-    'devices:read',
     'vehicles:read',
     'vehicles:flag-stolen',
     'vehicles:clear-status',
@@ -85,7 +84,6 @@ export const ROLE_PERMISSIONS = {
     'drivers:update-status',
     'locations:area-read',
     'users:read',
-    'users:create',
     'users:update',
     'users:delete'
   ],
@@ -95,7 +93,6 @@ export const ROLE_PERMISSIONS = {
     'districts:read',
     'divisional_secretariats:read',
     'stations:read',
-    'devices:read',
     'vehicles:read',
     'vehicles:flag-stolen',
     'vehicles:clear-status',
@@ -111,7 +108,6 @@ export const ROLE_PERMISSIONS = {
     'districts:read',
     'divisional_secretariats:read',
     'stations:read',
-    'devices:read',
     'vehicles:read',
     'vehicles:flag-stolen',
     'vehicles:clear-status',
@@ -121,7 +117,6 @@ export const ROLE_PERMISSIONS = {
     'drivers:update-status',
     'locations:area-read',
     'users:read',
-    'users:create',
     'users:update',
     'users:delete'
   ],
@@ -131,7 +126,6 @@ export const ROLE_PERMISSIONS = {
     'districts:read',
     'divisional_secretariats:read',
     'stations:read',
-    'devices:read',
     'vehicles:read',
     'vehicles:flag-stolen',
     'vehicles:clear-status',
@@ -173,6 +167,7 @@ export const ROLE_CREATION_CEILING = {
     'DATA_REGISTRAR'
   ],
   PROVINCIAL_COMMANDER: [
+    'PROVINCIAL_OFFICER',
     'DISTRICT_COMMANDER',
     'DISTRICT_OFFICER',
     'STATION_COMMANDER',

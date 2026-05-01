@@ -1,0 +1,2422 @@
+openapi: 3.0.3
+
+info:
+  title: SLPVT API
+  description: Sri Lanka Police Vehicle Tracking System — REST API for managing stations, vehicles, drivers, tracking devices, and GPS location data.
+  version: 1.0.0
+  contact:
+    name: SLPVT Development Team
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: Login, token refresh, and logout
+  - name: Provinces
+    description: Province administrative boundary data
+  - name: Districts
+    description: District administrative boundary data
+  - name: Divisional Secretariats
+    description: DS division administrative boundary data
+  - name: Stations
+    description: Police station management
+  - name: Users
+    description: System user management
+  - name: Tracking Devices
+    description: GPS tracking device provisioning and management
+  - name: Vehicles
+    description: Registered vehicle management, location history, and assignments
+  - name: Drivers
+    description: Registered driver management
+  - name: Locations
+    description: Device telemetry ingestion and live location queries
+  - name: Reports
+    description: Investigative spatial reports
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token obtained from POST /auth/login
+    DeviceApiKey:
+      type: apiKey
+      in: header
+      name: X-Device-Key
+      description: Raw API key issued to a tracking device at provisioning time
+
+  parameters:
+    offsetParam:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    limitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    sortByParam:
+      name: sortBy
+      in: query
+      schema:
+        type: string
+    orderParam:
+      name: order
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+
+  schemas:
+
+    Coordinates:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        description:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                nullable: true
+              message:
+                type: string
+
+    PaginatedMeta:
+      type: object
+      properties:
+        count:
+          type: integer
+        offset:
+          type: integer
+        limit:
+          type: integer
+        next:
+          type: string
+          nullable: true
+        previous:
+          type: string
+          nullable: true
+
+    Province:
+      type: object
+      properties:
+        province_slug:
+          type: string
+          example: western
+        name:
+          type: string
+          example: Western
+        district_count:
+          type: integer
+          example: 3
+
+    District:
+      type: object
+      properties:
+        district_slug:
+          type: string
+          example: colombo
+        name:
+          type: string
+          example: Colombo
+        province_slug:
+          type: string
+          example: western
+        province_name:
+          type: string
+          example: Western
+        ds_division_count:
+          type: integer
+          example: 7
+
+    DSDivision:
+      type: object
+      properties:
+        ds_division_slug:
+          type: string
+          example: colombo
+        name:
+          type: string
+          example: Colombo
+        district_slug:
+          type: string
+          example: colombo
+        district_name:
+          type: string
+          example: Colombo
+        province_slug:
+          type: string
+          example: western
+        province_name:
+          type: string
+          example: Western
+
+    Station:
+      type: object
+      properties:
+        short_code:
+          type: string
+          example: COL001
+        station_type:
+          type: string
+          enum: [Police Post, Division Office, Range Office, Police Headquarters]
+        name:
+          type: string
+          example: Colombo Police Post
+        contact_number:
+          type: string
+          nullable: true
+          example: "+94112421002"
+        coordinates:
+          type: object
+          properties:
+            latitude:
+              type: number
+              nullable: true
+              example: 6.9271
+            longitude:
+              type: number
+              nullable: true
+              example: 79.8612
+        location:
+          type: object
+          properties:
+            ds_division:
+              type: object
+              nullable: true
+              properties:
+                name:
+                  type: string
+                ds_division_slug:
+                  type: string
+            district:
+              type: object
+              nullable: true
+              properties:
+                name:
+                  type: string
+                district_slug:
+                  type: string
+            province:
+              type: object
+              nullable: true
+              properties:
+                name:
+                  type: string
+                province_slug:
+                  type: string
+
+    StationInput:
+      type: object
+      required: [name, short_code, station_type]
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        short_code:
+          type: string
+          maxLength: 10
+        station_type:
+          type: string
+          enum: [Police Post, Division Office, Range Office, Police Headquarters]
+        contact_number:
+          type: string
+          maxLength: 20
+          nullable: true
+        province_slug:
+          type: string
+          description: Required for Range Office
+        district_slug:
+          type: string
+          description: Required for Division Office
+        ds_division_slug:
+          type: string
+          description: Required for Police Post
+        latitude:
+          type: number
+          minimum: -90
+          maximum: 90
+          nullable: true
+        longitude:
+          type: number
+          minimum: -180
+          maximum: 180
+          nullable: true
+
+    User:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        badge_number:
+          type: string
+          example: SLP-00001
+        first_name:
+          type: string
+        last_name:
+          type: string
+        system_role:
+          type: string
+          enum: [SUPER_ADMIN, PROVINCIAL_COMMANDER, PROVINCIAL_OFFICER, DISTRICT_COMMANDER, DISTRICT_OFFICER, STATION_COMMANDER, STATION_OFFICER, DATA_REGISTRAR, DEVICE_CLIENT]
+        assigned_station_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    TrackingDevice:
+      type: object
+      properties:
+        device_id:
+          type: string
+          format: uuid
+        serial_number:
+          type: string
+          example: SN-TRK-00001
+        issued_date:
+          type: string
+          format: date
+          example: "2026-01-15"
+        admin_status:
+          type: string
+          enum: [ACTIVE, UNDER_REPAIR, DECOMMISSIONED]
+
+    Vehicle:
+      type: object
+      properties:
+        vehicle_id:
+          type: string
+          format: uuid
+        vehicle_reference_id:
+          type: string
+          example: REF00001
+        registration_number:
+          type: string
+          example: WP AAB-1234
+        chassis_number:
+          type: string
+        color:
+          type: string
+          example: Yellow
+        make_model:
+          type: string
+          example: Bajaj RE
+        police_status:
+          type: string
+          enum: [CLEAN, STOLEN, WANTED, SUSPENDED]
+        owner_full_name:
+          type: string
+        owner_contact:
+          type: string
+          nullable: true
+        device_serial_number:
+          type: string
+          nullable: true
+        device_admin_status:
+          type: string
+          nullable: true
+          enum: [ACTIVE, UNDER_REPAIR, DECOMMISSIONED]
+        ds_division_name:
+          type: string
+        district_name:
+          type: string
+        province_name:
+          type: string
+
+    Driver:
+      type: object
+      properties:
+        driver_id:
+          type: string
+          format: uuid
+        driver_reference_id:
+          type: string
+          example: DRV00001
+        first_name:
+          type: string
+        last_name:
+          type: string
+        permanent_address:
+          type: string
+        driving_license_number:
+          type: string
+          example: B000001
+        license_expiry_date:
+          type: string
+          format: date
+        police_status:
+          type: string
+          enum: [CLEAR, WANTED, SUSPENDED_LICENSE]
+
+    LiveLocation:
+      type: object
+      properties:
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        battery_level:
+          type: integer
+          minimum: 0
+          maximum: 100
+        pinged_at:
+          type: string
+          format: date-time
+        is_stale:
+          type: boolean
+          description: True if the last ping is older than 10 minutes
+
+    LiveLocationWithVehicle:
+      allOf:
+        - type: object
+          properties:
+            registration_number:
+              type: string
+              example: WP AAB-1234
+            police_status:
+              type: string
+              enum: [CLEAN, STOLEN, WANTED, SUSPENDED]
+        - $ref: '#/components/schemas/LiveLocation'
+
+    HistoryPing:
+      type: object
+      properties:
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        battery_level:
+          type: integer
+        pinged_at:
+          type: string
+          format: date-time
+
+    BoundaryCrossingEvent:
+      type: object
+      properties:
+        registration_number:
+          type: string
+        police_status:
+          type: string
+          enum: [CLEAN, STOLEN, WANTED, SUSPENDED]
+        event:
+          type: string
+          enum: [entry, exit]
+        pinged_at:
+          type: string
+          format: date-time
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        battery_level:
+          type: integer
+
+    VehicleAssignment:
+      type: object
+      properties:
+        assigned_date:
+          type: string
+          format: date
+        returned_date:
+          type: string
+          format: date
+          nullable: true
+        first_name:
+          type: string
+        last_name:
+          type: string
+        driving_license_number:
+          type: string
+        driver_police_status:
+          type: string
+          enum: [CLEAR, WANTED, SUSPENDED_LICENSE]
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid authentication credentials
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 401
+            message: Authorization header missing or malformed
+            description: null
+            errors: []
+    Forbidden:
+      description: Authenticated but insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 403
+            message: Role STATION_OFFICER does not have permission to perform this action
+            description: null
+            errors: []
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 404
+            message: Resource not found
+            description: null
+            errors: []
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 409
+            message: A station with this name already exists
+            description: null
+            errors: []
+    ValidationError:
+      description: Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 422
+            message: Validation failed
+            description: One or more fields in the request are invalid
+            errors:
+              - field: name
+                message: name is required
+    RateLimit:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            code: 429
+            message: Too many requests
+            description: You have exceeded the rate limit. Please try again later.
+            errors: []
+
+paths:
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Officer login
+      description: Authenticates an officer using badge number and password. Returns a short-lived JWT access token and a 7-day refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [badge_number, password]
+              properties:
+                badge_number:
+                  type: string
+                  example: SLP-00001
+                password:
+                  type: string
+                  format: password
+                  example: Test@1234
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              example:
+                access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                refresh_token: a3f1b2c4d5e6...
+                expires_in: 900
+                token_type: Bearer
+                role: STATION_COMMANDER
+                user:
+                  user_id: 550e8400-e29b-41d4-a716-446655440000
+                  badge_number: SLP-00001
+                  first_name: Rohan
+                  last_name: Perera
+                  role: STATION_COMMANDER
+        "401":
+          description: Invalid badge number or password
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Invalid badge number or password
+                description: null
+                errors: []
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "429":
+          $ref: '#/components/responses/RateLimit'
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      description: Issues a new access token using a valid refresh token. The used refresh token is immediately invalidated and a new one is returned.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "200":
+          description: Token refreshed successfully
+          content:
+            application/json:
+              example:
+                access_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                refresh_token: b4c2d3e4f5a6...
+                expires_in: 900
+                token_type: Bearer
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "429":
+          $ref: '#/components/responses/RateLimit'
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Logout
+      description: Invalidates the provided refresh token. Idempotent — returns success even if the token does not exist.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "200":
+          description: Logged out successfully
+          content:
+            application/json:
+              example:
+                message: Logged out successfully
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /provinces:
+    get:
+      tags: [Provinces]
+      summary: List all provinces
+      description: Returns a paginated list of all 9 provinces in Sri Lanka with their district counts.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of provinces
+          content:
+            application/json:
+              example:
+                count: 9
+                offset: 0
+                limit: 20
+                next: null
+                previous: null
+                data:
+                  - province_slug: western
+                    name: Western
+                    district_count: 3
+                  - province_slug: central
+                    name: Central
+                    district_count: 3
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /provinces/{provinceSlug}:
+    get:
+      tags: [Provinces]
+      summary: Get a province by slug
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: provinceSlug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: western
+      responses:
+        "200":
+          description: Province record
+          content:
+            application/json:
+              example:
+                data:
+                  province_slug: western
+                  name: Western
+                  district_count: 3
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /provinces/{provinceSlug}/districts:
+    get:
+      tags: [Provinces]
+      summary: List districts within a province
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: provinceSlug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: western
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of districts in the province
+          content:
+            application/json:
+              example:
+                count: 3
+                offset: 0
+                limit: 20
+                next: null
+                previous: null
+                data:
+                  - district_slug: colombo
+                    name: Colombo
+                    province_slug: western
+                    province_name: Western
+                    ds_division_count: 7
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /districts:
+    get:
+      tags: [Districts]
+      summary: List all districts
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of districts
+          content:
+            application/json:
+              example:
+                count: 25
+                offset: 0
+                limit: 20
+                next: /api/v1/districts?offset=20&limit=20
+                previous: null
+                data:
+                  - district_slug: colombo
+                    name: Colombo
+                    province_slug: western
+                    province_name: Western
+                    ds_division_count: 7
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /districts/{districtSlug}:
+    get:
+      tags: [Districts]
+      summary: Get a district by slug
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: districtSlug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: colombo
+      responses:
+        "200":
+          description: District record
+          content:
+            application/json:
+              example:
+                data:
+                  district_slug: colombo
+                  name: Colombo
+                  province_slug: western
+                  province_name: Western
+                  ds_division_count: 7
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /districts/{districtSlug}/divisional-secretariats:
+    get:
+      tags: [Districts]
+      summary: List DS divisions within a district
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: districtSlug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: colombo
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of DS divisions
+          content:
+            application/json:
+              example:
+                count: 7
+                offset: 0
+                limit: 20
+                next: null
+                previous: null
+                data:
+                  - ds_division_slug: colombo
+                    name: Colombo
+                    district_slug: colombo
+                    district_name: Colombo
+                    province_slug: western
+                    province_name: Western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /divisional-secretariats:
+    get:
+      tags: [Divisional Secretariats]
+      summary: List all DS divisions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of DS divisions
+          content:
+            application/json:
+              example:
+                count: 331
+                offset: 0
+                limit: 20
+                next: /api/v1/divisional-secretariats?offset=20&limit=20
+                previous: null
+                data:
+                  - ds_division_slug: colombo
+                    name: Colombo
+                    district_slug: colombo
+                    district_name: Colombo
+                    province_slug: western
+                    province_name: Western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  /divisional-secretariats/{dsSlug}:
+    get:
+      tags: [Divisional Secretariats]
+      summary: Get a DS division by slug
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: dsSlug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: colombo
+      responses:
+        "200":
+          description: DS division record
+          content:
+            application/json:
+              example:
+                data:
+                  ds_division_slug: colombo
+                  name: Colombo
+                  district_slug: colombo
+                  district_name: Colombo
+                  province_slug: western
+                  province_name: Western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /stations:
+    get:
+      tags: [Stations]
+      summary: List all stations
+      description: Returns a paginated list of active stations. Soft-deleted stations are excluded.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: stationType
+          in: query
+          schema:
+            type: string
+            enum: [Police Post, Division Office, Range Office, Police Headquarters]
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+            enum: [name, short_code, created_at, station_type]
+            default: name
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of stations
+          content:
+            application/json:
+              example:
+                count: 39
+                offset: 0
+                limit: 20
+                next: /api/v1/stations?offset=20&limit=20
+                previous: null
+                data:
+                  - short_code: COL001
+                    station_type: Police Post
+                    name: Colombo Police Post
+                    contact_number: "+94112421002"
+                    coordinates:
+                      latitude: 6.9271
+                      longitude: 79.8612
+                    location:
+                      ds_division:
+                        name: Colombo
+                        ds_division_slug: colombo
+                      district:
+                        name: Colombo
+                        district_slug: colombo
+                      province:
+                        name: Western
+                        province_slug: western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Stations]
+      summary: Create a new station
+      description: Creates a new police station. Requires SUPER_ADMIN. Only one Police Headquarters may exist at any time.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StationInput'
+            example:
+              name: Kaduwela Police Post
+              short_code: KAD002
+              station_type: Police Post
+              contact_number: "+94112537002"
+              ds_division_slug: kaduwela
+              latitude: 6.9286
+              longitude: 79.9892
+      responses:
+        "201":
+          description: Station created
+          content:
+            application/json:
+              example:
+                data:
+                  short_code: KAD002
+                  station_type: Police Post
+                  name: Kaduwela Police Post
+                  contact_number: "+94112537002"
+                  coordinates:
+                    latitude: 6.9286
+                    longitude: 79.9892
+                  location:
+                    ds_division:
+                      name: Kaduwela
+                      ds_division_slug: kaduwela
+                    district:
+                      name: Colombo
+                      district_slug: colombo
+                    province:
+                      name: Western
+                      province_slug: western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /stations/{shortCode}:
+    get:
+      tags: [Stations]
+      summary: Get a station by short code
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: shortCode
+          in: path
+          required: true
+          schema:
+            type: string
+            example: COL001
+      responses:
+        "200":
+          description: Station record
+          content:
+            application/json:
+              example:
+                data:
+                  short_code: COL001
+                  station_type: Police Post
+                  name: Colombo Police Post
+                  contact_number: "+94112421002"
+                  coordinates:
+                    latitude: 6.9271
+                    longitude: 79.8612
+                  location:
+                    ds_division:
+                      name: Colombo
+                      ds_division_slug: colombo
+                    district:
+                      name: Colombo
+                      district_slug: colombo
+                    province:
+                      name: Western
+                      province_slug: western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Stations]
+      summary: Update a station
+      description: Updates one or more fields of an existing station. All fields are optional — only provided fields are updated.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: shortCode
+          in: path
+          required: true
+          schema:
+            type: string
+            example: COL001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              contact_number: "+94112421099"
+              latitude: 6.9300
+              longitude: 79.8620
+      responses:
+        "200":
+          description: Station updated
+          content:
+            application/json:
+              example:
+                message: Station updated successfully
+                data:
+                  short_code: COL001
+                  station_type: Police Post
+                  name: Colombo Police Post
+                  contact_number: "+94112421099"
+                  coordinates:
+                    latitude: 6.9300
+                    longitude: 79.8620
+                  location:
+                    ds_division:
+                      name: Colombo
+                      ds_division_slug: colombo
+                    district:
+                      name: Colombo
+                      district_slug: colombo
+                    province:
+                      name: Western
+                      province_slug: western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags: [Stations]
+      summary: Soft delete a station
+      description: Marks a station as deleted. The record is retained for audit. Fails if any active users are assigned to this station. Requires SUPER_ADMIN.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: shortCode
+          in: path
+          required: true
+          schema:
+            type: string
+            example: COL001
+      responses:
+        "200":
+          description: Station deleted
+          content:
+            application/json:
+              example:
+                message: Station deleted successfully
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "409":
+          description: Station has active users assigned
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Cannot delete a station that has active users assigned to it
+                description: null
+                errors: []
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List users
+      description: Returns a paginated list of active users. Scope is enforced — commanders see only users within their jurisdiction.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: firstName
+          in: query
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          schema:
+            type: string
+        - name: systemRole
+          in: query
+          schema:
+            type: string
+            enum: [SUPER_ADMIN, PROVINCIAL_COMMANDER, PROVINCIAL_OFFICER, DISTRICT_COMMANDER, DISTRICT_OFFICER, STATION_COMMANDER, STATION_OFFICER, DATA_REGISTRAR, DEVICE_CLIENT]
+        - name: provinceSlug
+          in: query
+          schema:
+            type: string
+        - name: districtSlug
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of users
+          content:
+            application/json:
+              example:
+                count: 8
+                offset: 0
+                limit: 20
+                next: null
+                previous: null
+                data:
+                  - user_id: 550e8400-e29b-41d4-a716-446655440000
+                    badge_number: SLP-00001
+                    first_name: Rohan
+                    last_name: Perera
+                    system_role: SUPER_ADMIN
+                    assigned_station_id: null
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Users]
+      summary: Create a new user
+      description: Creates a new system user. The requesting role must outrank the target role per the role creation ceiling.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              badge_number: SLP-00009
+              password: Secure@9999
+              first_name: Amara
+              last_name: Kumara
+              system_role: STATION_OFFICER
+              station_short_code: COL001
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              example:
+                data:
+                  user_id: 661e9511-f30c-52e5-b827-557766551111
+                  badge_number: SLP-00009
+                  first_name: Amara
+                  last_name: Kumara
+                  system_role: STATION_OFFICER
+                  assigned_station_id: some-uuid
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /users/{badgeNumber}:
+    get:
+      tags: [Users]
+      summary: Get a user by badge number
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: badgeNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            example: SLP-00001
+      responses:
+        "200":
+          description: User record
+          content:
+            application/json:
+              example:
+                data:
+                  user_id: 550e8400-e29b-41d4-a716-446655440000
+                  badge_number: SLP-00001
+                  first_name: Rohan
+                  last_name: Perera
+                  system_role: SUPER_ADMIN
+                  assigned_station_id: null
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Users]
+      summary: Update a user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: badgeNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            example: SLP-00001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              first_name: Rohan
+              last_name: Perera
+              system_role: STATION_COMMANDER
+              station_short_code: COL001
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              example:
+                message: User updated successfully
+                data:
+                  user_id: 550e8400-e29b-41d4-a716-446655440000
+                  badge_number: SLP-00001
+                  first_name: Rohan
+                  last_name: Perera
+                  system_role: STATION_COMMANDER
+                  assigned_station_id: some-uuid
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags: [Users]
+      summary: Soft delete a user
+      description: Marks a user as deleted by setting deleted_at. The record is retained for audit.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: badgeNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            example: SLP-00001
+      responses:
+        "200":
+          description: User deleted
+          content:
+            application/json:
+              example:
+                message: User deleted successfully
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /devices:
+    get:
+      tags: [Tracking Devices]
+      summary: List tracking devices
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: adminStatus
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, UNDER_REPAIR, DECOMMISSIONED]
+        - name: serialNumber
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of tracking devices
+          content:
+            application/json:
+              example:
+                count: 150
+                offset: 0
+                limit: 20
+                next: /api/v1/devices?offset=20&limit=20
+                previous: null
+                data:
+                  - device_id: 770e8400-e29b-41d4-a716-446655440000
+                    serial_number: SN-TRK-00001
+                    issued_date: "2026-01-15"
+                    admin_status: ACTIVE
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Tracking Devices]
+      summary: Provision a new tracking device
+      description: Registers a new GPS tracking device. Returns the raw API key once — it is never stored and cannot be retrieved again.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              serial_number: SN-TRK-00201
+              issued_date: "2026-05-01"
+              admin_status: ACTIVE
+      responses:
+        "201":
+          description: Device provisioned. The api_key is returned once only.
+          content:
+            application/json:
+              example:
+                data:
+                  device_id: 880f9511-f30c-52e5-b827-557766552222
+                  serial_number: SN-TRK-00201
+                  issued_date: "2026-05-01"
+                  admin_status: ACTIVE
+                  api_key: a3f1b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /devices/{serialNumber}:
+    get:
+      tags: [Tracking Devices]
+      summary: Get a device by serial number
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: serialNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            example: SN-TRK-00001
+      responses:
+        "200":
+          description: Device record
+          content:
+            application/json:
+              example:
+                data:
+                  device_id: 770e8400-e29b-41d4-a716-446655440000
+                  serial_number: SN-TRK-00001
+                  issued_date: "2026-01-15"
+                  admin_status: ACTIVE
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Tracking Devices]
+      summary: Update device status
+      description: Updates the operational status of a tracking device.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: serialNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            example: SN-TRK-00001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              admin_status: UNDER_REPAIR
+      responses:
+        "200":
+          description: Device updated
+          content:
+            application/json:
+              example:
+                message: Device updated successfully
+                data:
+                  device_id: 770e8400-e29b-41d4-a716-446655440000
+                  serial_number: SN-TRK-00001
+                  issued_date: "2026-01-15"
+                  admin_status: UNDER_REPAIR
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /vehicles:
+    get:
+      tags: [Vehicles]
+      summary: List vehicles
+      description: Returns a paginated list of active vehicles with optional filters. Scope is enforced based on the requesting officer's jurisdiction.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: registrationNumber
+          in: query
+          schema:
+            type: string
+        - name: ownerNic
+          in: query
+          schema:
+            type: string
+        - name: ownerName
+          in: query
+          schema:
+            type: string
+        - name: policeStatus
+          in: query
+          schema:
+            type: string
+            enum: [CLEAN, STOLEN, WANTED, SUSPENDED]
+        - name: makeModel
+          in: query
+          schema:
+            type: string
+        - name: hasDevice
+          in: query
+          schema:
+            type: boolean
+        - name: dsDivisionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: districtId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: provinceId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of vehicles
+          content:
+            application/json:
+              example:
+                count: 205
+                offset: 0
+                limit: 20
+                next: /api/v1/vehicles?offset=20&limit=20
+                previous: null
+                data:
+                  - vehicle_id: 991e8400-e29b-41d4-a716-446655440000
+                    vehicle_reference_id: REF00001
+                    registration_number: WP AAB-1234
+                    chassis_number: CHASSIS00000001
+                    color: Yellow
+                    make_model: Bajaj RE
+                    police_status: CLEAN
+                    owner_full_name: Nuwan Perera
+                    owner_contact: "+94771234567"
+                    device_serial_number: SN-TRK-00001
+                    device_admin_status: ACTIVE
+                    ds_division_name: Colombo
+                    district_name: Colombo
+                    province_name: Western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Vehicles]
+      summary: Register a new vehicle
+      description: Registers a tuk-tuk imported from the DMT database.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              vehicle_reference_id: REF00206
+              registration_number: WP ZZZ-9999
+              chassis_number: CHASSIS00000206
+              color: Blue
+              make_model: TVS King
+              owner_nic: "199012345678"
+              owner_full_name: Kamal Silva
+              owner_contact: "+94772345678"
+              ds_division_id: some-uuid
+      responses:
+        "201":
+          description: Vehicle registered
+          content:
+            application/json:
+              example:
+                data:
+                  vehicle_id: aa2e9511-f30c-52e5-b827-557766553333
+                  vehicle_reference_id: REF00206
+                  registration_number: WP ZZZ-9999
+                  chassis_number: CHASSIS00000206
+                  color: Blue
+                  make_model: TVS King
+                  police_status: CLEAN
+                  owner_full_name: Kamal Silva
+                  owner_contact: "+94772345678"
+                  ds_division_id: some-uuid
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /vehicles/{registrationNumber}:
+    get:
+      tags: [Vehicles]
+      summary: Get a vehicle by registration number
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: registrationNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: WP AAB-1234
+      responses:
+        "200":
+          description: Vehicle record
+          content:
+            application/json:
+              example:
+                data:
+                  vehicle_id: 991e8400-e29b-41d4-a716-446655440000
+                  registration_number: WP AAB-1234
+                  color: Yellow
+                  make_model: Bajaj RE
+                  police_status: CLEAN
+                  owner_full_name: Nuwan Perera
+                  device_serial_number: SN-TRK-00001
+                  device_admin_status: ACTIVE
+                  ds_division_name: Colombo
+                  district_name: Colombo
+                  province_name: Western
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Vehicles]
+      summary: Update vehicle police status or device
+      description: Updates the law enforcement status of a vehicle or assigns a tracking device.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: registrationNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: WP AAB-1234
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              police_status: STOLEN
+      responses:
+        "200":
+          description: Vehicle updated
+          content:
+            application/json:
+              example:
+                message: Vehicle updated successfully
+                data:
+                  registration_number: WP AAB-1234
+                  police_status: STOLEN
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /vehicles/{registrationNumber}/live-location:
+    get:
+      tags: [Vehicles]
+      summary: Get the live location of a vehicle
+      description: Returns the most recent GPS ping for the vehicle's tracking device. is_stale is true if the last ping is older than 10 minutes.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: registrationNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: WP AAB-1234
+      responses:
+        "200":
+          description: Latest ping location
+          content:
+            application/json:
+              example:
+                data:
+                  coordinates:
+                    latitude: 6.9271
+                    longitude: 79.8612
+                  battery_level: 85
+                  pinged_at: "2026-05-02T08:14:00.000Z"
+                  is_stale: false
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          description: Vehicle not found or no device assigned or no pings recorded
+          content:
+            application/json:
+              examples:
+                no_vehicle:
+                  value:
+                    code: 404
+                    message: Vehicle not found
+                    description: null
+                    errors: []
+                no_device:
+                  value:
+                    code: 404
+                    message: No tracking device assigned to this vehicle
+                    description: null
+                    errors: []
+                no_pings:
+                  value:
+                    code: 404
+                    message: No location data available for this vehicle
+                    description: null
+                    errors: []
+
+  /vehicles/{registrationNumber}/location-history:
+    get:
+      tags: [Vehicles]
+      summary: Get location history for a vehicle
+      description: Returns a paginated trail of GPS pings for a vehicle. Defaults to the last 1 hour when from and to are omitted. Maximum window is 30 days. Adding lat, lng and radius (all required together) filters to pings within that radius of the given point.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: registrationNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: WP AAB-1234
+        - name: from
+          in: query
+          description: Start of time window (ISO 8601). Defaults to 1 hour before to.
+          schema:
+            type: string
+            format: date-time
+            example: "2026-04-25T00:00:00Z"
+        - name: to
+          in: query
+          description: End of time window (ISO 8601). Defaults to now.
+          schema:
+            type: string
+            format: date-time
+            example: "2026-04-26T00:00:00Z"
+        - name: lat
+          in: query
+          description: Latitude of the center point for spatial filtering. Requires lng and radius.
+          schema:
+            type: number
+            minimum: -90
+            maximum: 90
+        - name: lng
+          in: query
+          description: Longitude of the center point for spatial filtering. Requires lat and radius.
+          schema:
+            type: number
+            minimum: -180
+            maximum: 180
+        - name: radius
+          in: query
+          description: Radius in meters for spatial filtering. Maximum 50000. Requires lat and lng.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50000
+        - $ref: '#/components/parameters/offsetParam'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 20
+      responses:
+        "200":
+          description: Paginated ping history
+          content:
+            application/json:
+              example:
+                count: 720
+                offset: 0
+                limit: 20
+                next: /api/v1/vehicles/WP%20AAB-1234/location-history?offset=20&limit=20
+                previous: null
+                data:
+                  - coordinates:
+                      latitude: 6.9271
+                      longitude: 79.8612
+                    battery_level: 92
+                    pinged_at: "2026-04-25T00:02:00.000Z"
+                  - coordinates:
+                      latitude: 6.9280
+                      longitude: 79.8620
+                    battery_level: 91
+                    pinged_at: "2026-04-25T00:04:00.000Z"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          description: Time window exceeds 30 days or to is before from
+          content:
+            application/json:
+              example:
+                code: 422
+                message: Time window cannot exceed 30 days
+                description: null
+                errors: []
+
+  /vehicles/{registrationNumber}/assignments:
+    get:
+      tags: [Vehicles]
+      summary: List driver assignments for a vehicle
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: registrationNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: WP AAB-1234
+        - name: activeOnly
+          in: query
+          description: When true, returns only the current active assignment.
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of assignments
+          content:
+            application/json:
+              example:
+                count: 3
+                offset: 0
+                limit: 20
+                next: null
+                previous: null
+                data:
+                  - assigned_date: "2026-03-01"
+                    returned_date: "2026-04-01"
+                    first_name: Nuwan
+                    last_name: Perera
+                    driving_license_number: B000001
+                    driver_police_status: CLEAR
+                  - assigned_date: "2026-04-02"
+                    returned_date: null
+                    first_name: Kamal
+                    last_name: Silva
+                    driving_license_number: B000002
+                    driver_police_status: CLEAR
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      tags: [Vehicles]
+      summary: Assign a driver to a vehicle
+      description: Creates a new driver assignment. The vehicle must not already have an active assignment.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: registrationNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: WP AAB-1234
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              license_number: B000005
+              assigned_date: "2026-05-01"
+      responses:
+        "201":
+          description: Assignment created
+          content:
+            application/json:
+              example:
+                data:
+                  assignment_id: bb3f0622-g41d-63f6-c938-668877664444
+                  vehicle_id: 991e8400-e29b-41d4-a716-446655440000
+                  driver_id: cc4g1733-h52e-74g7-d049-779988775555
+                  assigned_date: "2026-05-01"
+                  returned_date: null
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /vehicles/{registrationNumber}/assignments/{licenseNumber}:
+    patch:
+      tags: [Vehicles]
+      summary: Close a driver assignment
+      description: Sets the returned_date on an assignment, marking it as closed.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: registrationNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: WP AAB-1234
+        - name: licenseNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: B000005
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              returned_date: "2026-05-02"
+      responses:
+        "200":
+          description: Assignment closed
+          content:
+            application/json:
+              example:
+                message: Assignment closed successfully
+                data:
+                  assignment_id: bb3f0622-g41d-63f6-c938-668877664444
+                  assigned_date: "2026-05-01"
+                  returned_date: "2026-05-02"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /drivers:
+    get:
+      tags: [Drivers]
+      summary: List drivers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: firstName
+          in: query
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          schema:
+            type: string
+        - name: licenseNumber
+          in: query
+          schema:
+            type: string
+        - name: referenceId
+          in: query
+          schema:
+            type: string
+        - name: policeStatus
+          in: query
+          schema:
+            type: string
+            enum: [CLEAR, WANTED, SUSPENDED_LICENSE]
+        - name: licenseExpired
+          in: query
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of drivers
+          content:
+            application/json:
+              example:
+                count: 210
+                offset: 0
+                limit: 20
+                next: /api/v1/drivers?offset=20&limit=20
+                previous: null
+                data:
+                  - driver_id: dd5h2844-i63f-85h8-e150-880099886666
+                    driver_reference_id: DRV00001
+                    first_name: Nuwan
+                    last_name: Perera
+                    driving_license_number: B000001
+                    license_expiry_date: "2030-06-15"
+                    police_status: CLEAR
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      tags: [Drivers]
+      summary: Register a new driver
+      description: Registers a tuk-tuk driver imported from the DMT database.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              driver_reference_id: DRV00211
+              first_name: Sachith
+              last_name: Gunasekara
+              permanent_address: "No. 45, Galle Road, Colombo 03"
+              driving_license_number: B001000
+              license_expiry_date: "2031-01-01"
+      responses:
+        "201":
+          description: Driver registered
+          content:
+            application/json:
+              example:
+                data:
+                  driver_id: ee6i3955-j74g-96i9-f261-991100997777
+                  driver_reference_id: DRV00211
+                  first_name: Sachith
+                  last_name: Gunasekara
+                  driving_license_number: B001000
+                  license_expiry_date: "2031-01-01"
+                  police_status: CLEAR
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /drivers/{licenseNumber}:
+    get:
+      tags: [Drivers]
+      summary: Get a driver by license number
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: licenseNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            example: B000001
+      responses:
+        "200":
+          description: Driver record
+          content:
+            application/json:
+              example:
+                data:
+                  driver_id: dd5h2844-i63f-85h8-e150-880099886666
+                  driver_reference_id: DRV00001
+                  first_name: Nuwan
+                  last_name: Perera
+                  permanent_address: "No. 45, Galle Road, Colombo 03"
+                  driving_license_number: B000001
+                  license_expiry_date: "2030-06-15"
+                  police_status: CLEAR
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Drivers]
+      summary: Update a driver police status
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: licenseNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            example: B000001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              police_status: WANTED
+      responses:
+        "200":
+          description: Driver updated
+          content:
+            application/json:
+              example:
+                message: Driver updated successfully
+                data:
+                  driver_id: dd5h2844-i63f-85h8-e150-880099886666
+                  driving_license_number: B000001
+                  police_status: WANTED
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /locations:
+    post:
+      tags: [Locations]
+      summary: Submit a GPS ping
+      description: Ingests a location ping from a tracking device. Authenticated via the X-Device-Key header. The device identity is resolved from the key — device_id must not be included in the body.
+      security:
+        - DeviceApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [location, battery_level, pinged_at]
+              properties:
+                location:
+                  type: object
+                  required: [type, coordinates]
+                  properties:
+                    type:
+                      type: string
+                      enum: [Point]
+                    coordinates:
+                      type: array
+                      items:
+                        type: number
+                      minItems: 2
+                      maxItems: 2
+                      description: "[longitude, latitude]"
+                battery_level:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                pinged_at:
+                  type: string
+                  format: date-time
+            example:
+              location:
+                type: Point
+                coordinates: [79.8612, 6.9271]
+              battery_level: 85
+              pinged_at: "2026-05-02T08:14:00.000Z"
+      responses:
+        "201":
+          description: Ping recorded
+          content:
+            application/json:
+              example:
+                message: Ping recorded
+        "401":
+          description: Missing or invalid X-Device-Key
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Invalid device API key
+                description: null
+                errors: []
+        "403":
+          description: Device is decommissioned or under repair
+          content:
+            application/json:
+              example:
+                code: 403
+                message: Device has been decommissioned
+                description: null
+                errors: []
+        "409":
+          description: A ping from this device at this timestamp already exists
+          content:
+            application/json:
+              example:
+                code: 409
+                message: A ping from this device at this timestamp already exists
+                description: null
+                errors: []
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "429":
+          $ref: '#/components/responses/RateLimit'
+
+  /locations/live-locations:
+    get:
+      tags: [Locations]
+      summary: Get live vehicle locations within a jurisdiction
+      description: Returns all vehicles that have pinged within the last 10 minutes and whose last known coordinates fall within the geographic boundary of the given jurisdiction. Exactly one of provinceSlug, districtSlug, or dsDivisionSlug must be provided.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: provinceSlug
+          in: query
+          schema:
+            type: string
+            example: western
+        - name: districtSlug
+          in: query
+          schema:
+            type: string
+            example: colombo
+        - name: dsDivisionSlug
+          in: query
+          schema:
+            type: string
+            example: colombo
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        "200":
+          description: Live vehicle locations within the jurisdiction
+          content:
+            application/json:
+              example:
+                count: 43
+                offset: 0
+                limit: 20
+                next: /api/v1/locations/live-locations?districtSlug=colombo&offset=20&limit=20
+                previous: null
+                data:
+                  - registration_number: WP AAB-1234
+                    police_status: CLEAN
+                    coordinates:
+                      latitude: 6.9271
+                      longitude: 79.8612
+                    battery_level: 85
+                    pinged_at: "2026-05-02T08:14:00.000Z"
+                    is_stale: false
+                  - registration_number: WP BBC-5678
+                    police_status: STOLEN
+                    coordinates:
+                      latitude: 6.9150
+                      longitude: 79.8700
+                    battery_level: 42
+                    pinged_at: "2026-05-02T08:12:00.000Z"
+                    is_stale: false
+        "400":
+          description: None or multiple jurisdiction slugs provided
+          content:
+            application/json:
+              example:
+                code: 422
+                message: Validation failed
+                description: One or more fields in the request are invalid
+                errors:
+                  - field: null
+                    message: Exactly one of provinceSlug, districtSlug, or dsDivisionSlug is required
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          description: Jurisdiction not found or no boundary data available
+          content:
+            application/json:
+              example:
+                code: 404
+                message: District not found
+                description: null
+                errors: []
+        "429":
+          $ref: '#/components/responses/RateLimit'
+
+  /reports/boundary-crossings:
+    get:
+      tags: [Reports]
+      summary: Boundary crossing report
+      description: Returns all vehicle boundary crossing events within a given jurisdiction and time window. A crossing is detected when consecutive GPS pings show a vehicle moving from outside to inside the boundary (entry) or inside to outside (exit). Scope is enforced — provincial commanders cannot query outside their province, district commanders cannot query at the provincial level.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: provinceSlug
+          in: query
+          schema:
+            type: string
+            example: western
+        - name: districtSlug
+          in: query
+          schema:
+            type: string
+            example: colombo
+        - name: dsDivisionSlug
+          in: query
+          schema:
+            type: string
+            example: colombo
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: "2026-04-28T00:00:00Z"
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: "2026-04-29T00:00:00Z"
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        "200":
+          description: Paginated list of boundary crossing events ordered chronologically
+          content:
+            application/json:
+              example:
+                count: 12
+                offset: 0
+                limit: 20
+                next: null
+                previous: null
+                data:
+                  - registration_number: WP AAB-1234
+                    police_status: CLEAN
+                    event: entry
+                    pinged_at: "2026-04-28T08:14:00.000Z"
+                    coordinates:
+                      latitude: 6.9271
+                      longitude: 79.8612
+                    battery_level: 85
+                  - registration_number: WP AAB-1234
+                    police_status: CLEAN
+                    event: exit
+                    pinged_at: "2026-04-28T14:32:00.000Z"
+                    coordinates:
+                      latitude: 6.9300
+                      longitude: 79.8700
+                    battery_level: 72
+                  - registration_number: WP BBC-5678
+                    police_status: STOLEN
+                    event: entry
+                    pinged_at: "2026-04-28T22:08:00.000Z"
+                    coordinates:
+                      latitude: 6.9150
+                      longitude: 79.8500
+                    battery_level: 31
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "429":
+          $ref: '#/components/responses/RateLimit'

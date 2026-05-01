@@ -18,12 +18,7 @@ import {
 
 const router = Router()
 
-// All routes require authentication
 router.use(verifyJWT)
-
-// ─────────────────────────────────────────────
-// ADMIN & PROFILE ENDPOINTS
-// ─────────────────────────────────────────────
 
 router.get(
   '/',
@@ -36,6 +31,7 @@ router.get(
 router.get(
   '/:badgeNumber',
   standardLimiter,
+  requirePermission('users:read'),
   validateParams(userParamsSchema),
   userController.getByBadge
 )

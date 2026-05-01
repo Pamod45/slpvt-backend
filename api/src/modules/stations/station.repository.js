@@ -110,7 +110,7 @@ export const findUsersByStation = async (stationId, pagination) => {
 
   const data = await db('users')
     .where({ assigned_station_id: stationId, deleted_at: null })
-    .select('user_id', 'badge_number', 'first_name', 'last_name', 'system_role', 'created_at', 'updated_at')
+    .select('badge_number', 'first_name', 'last_name', 'system_role')
     .orderBy(sort_by, order)
     .limit(limit)
     .offset(offset)
