@@ -1,6 +1,7 @@
 import * as vehicleRepository from './vehicle.repository.js'
 import { findById as findDeviceById } from '../devices/device.repository.js'
 import { findByLicenseNumber as findDriverByLicense } from '../drivers/driver.repository.js'
+import { findBySlug as findDsDivisionBySlug } from '../divisional-secretariats/divisional-secretariat.repository.js'
 import { NotFoundError, ConflictError, ForbiddenError, ValidationError } from '../../utils/errors.js'
 
 const DEVICE_MANAGERS = ['PROVINCIAL_OFFICER', 'PROVINCIAL_COMMANDER', 'SUPER_ADMIN']
@@ -44,17 +45,21 @@ export const getVehicle = async (registrationNumber) => {
 }
 
 export const registerVehicle = async (data) => {
-  const [byRef, byReg, byChassis] = await Promise.all([
+  const { ds_division_slug, ...vehicleData } = data
+
+  const [byRef, byReg, byChassis, dsDivision] = await Promise.all([
     vehicleRepository.findByReferenceId(data.vehicle_reference_id),
     vehicleRepository.findByRegistrationNumber(data.registration_number),
-    vehicleRepository.findByChassisNumber(data.chassis_number)
+    vehicleRepository.findByChassisNumber(data.chassis_number),
+    findDsDivisionBySlug(ds_division_slug)
   ])
 
-  if (byRef)     throw new ConflictError('A vehicle with this DMT reference ID already exists')
-  if (byReg)     throw new ConflictError('A vehicle with this registration number already exists')
-  if (byChassis) throw new ConflictError('A vehicle with this chassis number already exists')
+  if (byRef)        throw new ConflictError('A vehicle with this DMT reference ID already exists')
+  if (byReg)        throw new ConflictError('A vehicle with this registration number already exists')
+  if (byChassis)    throw new ConflictError('A vehicle with this chassis number already exists')
+  if (!dsDivision)  throw new NotFoundError('Divisional secretariat not found')
 
-  return vehicleRepository.create(data)
+  return vehicleRepository.create({ ...vehicleData, ds_division_id: dsDivision.ds_division_id })
 }
 
 export const updateVehicle = async (registrationNumber, data, user) => {

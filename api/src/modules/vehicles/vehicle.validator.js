@@ -45,7 +45,7 @@ export const createVehicleSchema = Joi.object({
   owner_nic:            Joi.string().max(20).required(),
   owner_full_name:      Joi.string().max(200).required(),
   owner_contact:        Joi.string().max(20).optional().allow(null, ''),
-  ds_division_id:       Joi.string().uuid().required()
+  ds_division_slug:     Joi.string().max(100).required()
 })
 
 export const updateVehicleSchema = Joi.object({
