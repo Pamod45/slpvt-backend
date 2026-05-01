@@ -18,8 +18,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/ec2-user/Deployments/slpvt-backend/api
-            git pull origin main
-            npm install
+            git fetch origin main
+            git reset --hard origin/main
+            npm install --legacy-peer-deps
 
             # Write environment file from secrets
             cat > .env << 'ENVEOF'
@@ -38,7 +39,7 @@ jobs:
             ENVEOF
 
             # Run migrations — knex tracks what has already run, safe every deploy
-            npm run migrate
+            npx knex migrate:latest
 
             # Only seed if provinces table is empty
             EXISTING=$(PGPASSWORD=${{ secrets.PG_PASSWORD }} psql \
