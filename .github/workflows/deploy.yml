@@ -1,0 +1,129 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/Deployments/slpvt-backend/api
+            git pull origin main
+            npm install
+
+            # Write environment file from secrets
+            cat > .env << 'ENVEOF'
+            NODE_ENV=production
+            PORT=${{ secrets.PORT }}
+            PG_HOST=${{ secrets.PG_HOST }}
+            PG_PORT=${{ secrets.PG_PORT }}
+            PG_DB=${{ secrets.PG_DB }}
+            PG_USER=${{ secrets.PG_USER }}
+            PG_PASSWORD=${{ secrets.PG_PASSWORD }}
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
+            JWT_REFRESH_EXPIRES_IN=${{ secrets.JWT_REFRESH_EXPIRES_IN }}
+            ENVEOF
+
+            # Run migrations — knex tracks what has already run, safe every deploy
+            npm run migrate
+
+            # Only seed if provinces table is empty
+            EXISTING=$(PGPASSWORD=${{ secrets.PG_PASSWORD }} psql \
+              -h ${{ secrets.PG_HOST }} \
+              -U ${{ secrets.PG_USER }} \
+              -d ${{ secrets.PG_DB }} \
+              -t -c "SELECT COUNT(*) FROM provinces;" 2>/dev/null | tr -d ' ')
+
+            if [ "$EXISTING" = "0" ] || [ -z "$EXISTING" ]; then
+              echo "Database empty, running seeds..."
+              npm run seed
+            else
+              echo "Database already has data, skipping seeds."
+            fi
+
+            # Check MongoDB collections and seed if needed
+            cd /home/ec2-user/Deployments/slpvt-backend/api
+
+            DISTRICT_COUNT=$(node --input-type=module << 'JSEOF'
+            import mongoose from './node_modules/mongoose/index.js'
+            import 'dotenv/config'
+            await mongoose.connect(process.env.MONGO_URI)
+            const count = await mongoose.connection.db.collection('districts').countDocuments()
+            console.log(count)
+            await mongoose.disconnect()
+            JSEOF
+            )
+
+            if [ "$DISTRICT_COUNT" = "0" ] || [ -z "$DISTRICT_COUNT" ]; then
+              echo "Districts collection empty, seeding district boundaries..."
+              node scripts/seedDistrictBoundaries.js
+            else
+              echo "Districts already seeded ($DISTRICT_COUNT records), skipping."
+            fi
+
+            DS_COUNT=$(node --input-type=module << 'JSEOF'
+            import mongoose from './node_modules/mongoose/index.js'
+            import 'dotenv/config'
+            await mongoose.connect(process.env.MONGO_URI)
+            const count = await mongoose.connection.db.collection('divisional_secretariats').countDocuments()
+            console.log(count)
+            await mongoose.disconnect()
+            JSEOF
+            )
+
+            if [ "$DS_COUNT" = "0" ] || [ -z "$DS_COUNT" ]; then
+              echo "DS boundaries collection empty, seeding..."
+              node scripts/seedDSBoundaries.js
+            else
+              echo "DS boundaries already seeded ($DS_COUNT records), skipping."
+            fi
+
+            PING_COUNT=$(node --input-type=module << 'JSEOF'
+            import mongoose from './node_modules/mongoose/index.js'
+            import 'dotenv/config'
+            await mongoose.connect(process.env.MONGO_URI)
+            const count = await mongoose.connection.db.collection('location_pings').countDocuments()
+            console.log(count)
+            await mongoose.disconnect()
+            JSEOF
+            )
+
+            if [ "$PING_COUNT" -lt 1000000 ] 2>/dev/null; then
+              echo "location_pings has $PING_COUNT records (< 1M), running ping simulator..."
+              node scripts/pingSimulator.js
+            else
+              echo "location_pings already has $PING_COUNT records, skipping simulator."
+            fi
+
+            # Restart if running, start fresh if not
+            if pm2 describe slpvt-api > /dev/null 2>&1; then
+              pm2 restart slpvt-api
+            else
+              pm2 start src/server.js --name slpvt-api
+            fi
+
+            pm2 save
+            sudo systemctl restart nginx
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sleep 5
+            curl -f http://localhost:3000/api/v1/ && echo "Deployment successful" || echo "Health check failed"
