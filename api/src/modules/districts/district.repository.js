@@ -46,6 +46,7 @@ export const findBySlug = async (districtSlug) => {
     .where({ 'districts.district_slug': districtSlug.toLowerCase() })
     .select(
       'districts.district_id',
+      'provinces.province_id',
       'districts.district_slug',
       'districts.name',
       'provinces.province_slug',
@@ -54,6 +55,12 @@ export const findBySlug = async (districtSlug) => {
     )
     .groupBy('districts.district_id', 'provinces.province_id')
     .first()
+}
+
+export const findIdsByProvinceId = async (provinceId) => {
+  return db('districts')
+    .where({ province_id: provinceId })
+    .pluck('district_id')
 }
 
 export const findDivisionalSecretariatsByDistrict = async (districtId, pagination) => {

@@ -18,12 +18,7 @@ import {
 
 const router = Router()
 
-// All routes require authentication
 router.use(verifyJWT)
-
-// ─────────────────────────────────────────────
-// ADMIN & PROFILE ENDPOINTS
-// ─────────────────────────────────────────────
 
 router.get(
   '/',

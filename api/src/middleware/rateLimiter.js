@@ -68,5 +68,5 @@ export const pingLimiter = rateLimit({
   standardHeaders:   true,
   legacyHeaders:     false,
   handler:           rateLimitHandler,
-  keyGenerator: (req) => req.user?.user_id || ipKeyGenerator(req)
+  keyGenerator: (req) => req.headers['x-device-key'] || ipKeyGenerator(req)
 })

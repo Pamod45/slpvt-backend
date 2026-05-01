@@ -12,15 +12,15 @@ export const userParamsSchema = Joi.object({
 const roleValues = Object.values(ROLES)
 
 export const userQuerySchema = Joi.object({
-  offset:        Joi.number().integer().min(0).default(0),
-  limit:         Joi.number().integer().min(1).max(100).default(20),
-  sort_by:       Joi.string().valid('first_name', 'last_name', 'badge_number', 'created_at').default('created_at'),
-  order:         Joi.string().valid('asc', 'desc').default('desc'),
-  system_role:   Joi.string().valid(...roleValues).optional(),
-  first_name:    Joi.string().max(100).optional(),
-  last_name:     Joi.string().max(100).optional(),
-  district_slug: Joi.string().max(100).optional(),
-  province_slug: Joi.string().max(100).optional()
+  offset:       Joi.number().integer().min(0).default(0),
+  limit:        Joi.number().integer().min(1).max(100).default(20),
+  sortBy:       Joi.string().valid('first_name', 'last_name', 'badge_number', 'created_at').default('created_at'),
+  order:        Joi.string().valid('asc', 'desc').default('desc'),
+  systemRole:   Joi.string().valid(...roleValues).optional(),
+  firstName:    Joi.string().max(100).optional(),
+  lastName:     Joi.string().max(100).optional(),
+  districtSlug: Joi.string().max(100).optional(),
+  provinceSlug: Joi.string().max(100).optional()
 })
 
 export const createUserSchema = Joi.object({

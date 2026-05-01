@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:16
+    image: postgres:15
     container_name: slpvt_postgres
     environment:
       POSTGRES_DB: slpvt_dev

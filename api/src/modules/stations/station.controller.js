@@ -11,11 +11,11 @@ export const list = async (req, res, next) => {
   try {
     const pagination = {
       name:         req.query.name?.trim() || undefined,
-      station_type: req.query.station_type?.trim() || undefined,
+      station_type: req.query.stationType?.trim() || undefined,
       offset:       parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
       limit:        Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by:      req.query.sort_by || 'name',
-      order:        req.query.order   || 'asc'
+      sort_by:      req.query.sortBy || 'name',
+      order:        req.query.order  || 'asc'
     }
 
     const result = await stationService.listStations(pagination)
@@ -63,8 +63,8 @@ export const getUsers = async (req, res, next) => {
     const pagination = {
       offset:  parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
       limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by: req.query.sort_by || 'created_at',
-      order:   req.query.order   || 'desc'
+      sort_by: req.query.sortBy || 'created_at',
+      order:   req.query.order  || 'desc'
     }
 
     const result = await stationService.getStationUsers(

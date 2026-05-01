@@ -17,8 +17,8 @@ export const list = async (req, res, next) => {
       name:    req.query.name?.trim() || undefined,
       offset:  parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
       limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by: req.query.sort_by || 'name',
-      order:   req.query.order   || 'asc'
+      sort_by: req.query.sortBy || 'name',
+      order:   req.query.order  || 'asc'
     }
 
     const result = await dsService.listDivisionalSecretariats(pagination)

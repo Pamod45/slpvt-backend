@@ -9,11 +9,6 @@ import { Router } from 'express'
 
 const router = Router()
 
-// ─────────────────────────────────────────────
-// HEALTH CHECK
-// public endpoint — no auth required
-// ─────────────────────────────────────────────
-
 router.get('/health', (req, res) => {
   res.status(200).json({
     status:      'ok',
@@ -23,9 +18,6 @@ router.get('/health', (req, res) => {
   })
 })
 
-// ─────────────────────────────────────────────
-// MODULE ROUTES
-// ─────────────────────────────────────────────
 
 import authRoutes       from '../modules/auth/auth.routes.js'
 import provinceRoutes   from '../modules/provinces/province.routes.js'
@@ -36,17 +28,21 @@ import userRoutes       from '../modules/users/user.routes.js'
 import deviceRoutes     from '../modules/devices/device.routes.js'
 import vehicleRoutes    from '../modules/vehicles/vehicle.routes.js'
 import driverRoutes     from '../modules/drivers/driver.routes.js'
-// import locationRoutes   from '../modules/locations/location.routes.js'
+import locationRoutes     from '../modules/locations/location.routes.js'
+import liveLocationRoutes from '../modules/locations/live-location.routes.js'
+import reportRoutes       from '../modules/reports/report.routes.js'
 
-router.use('/auth',      authRoutes)
-router.use('/provinces', provinceRoutes)
-router.use('/districts', districtRoutes)
+router.use('/auth',           authRoutes)
+router.use('/provinces',      provinceRoutes)
+router.use('/districts',      districtRoutes)
 router.use('/divisional-secretariats', dsRoutes)
-router.use('/stations',  stationRoutes)
-router.use('/users',     userRoutes)
-router.use('/devices',   deviceRoutes)
-router.use('/vehicles',  vehicleRoutes)
-router.use('/drivers',   driverRoutes)
-// router.use('/locations', locationRoutes)
+router.use('/stations',       stationRoutes)
+router.use('/users',          userRoutes)
+router.use('/devices',        deviceRoutes)
+router.use('/vehicles',       vehicleRoutes)
+router.use('/drivers',        driverRoutes)
+router.use('/locations',      locationRoutes)
+router.use('/live-locations', liveLocationRoutes)
+router.use('/reports',        reportRoutes)
 
 export default router

@@ -145,14 +145,14 @@ const generatePingsForVehicle = (vehicle, districtName, profile) => {
 
   const pings = []
   const INTERVAL_MINUTES = 2
-  const DAYS = 7
+  const PAST_DAYS = 7
+  const FUTURE_DAYS = 2
+  const TOTAL_DAYS = PAST_DAYS + FUTURE_DAYS
   const PINGS_PER_DAY = (24 * 60) / INTERVAL_MINUTES
-  const TOTAL_PINGS = PINGS_PER_DAY * DAYS
+  const TOTAL_PINGS = PINGS_PER_DAY * TOTAL_DAYS
 
   const now = new Date()
-  const startTime = new Date(now)
-  startTime.setDate(startTime.getDate() - DAYS)
-  startTime.setHours(0, 0, 0, 0)
+  const startTime = new Date(now.getTime() - (PAST_DAYS * 24 * 60 * 60 * 1000))
 
   let currentPos = { lat: homeAnchor.lat, lng: homeAnchor.lng }
   let currentTarget = getRandom(routeAnchors)
@@ -274,7 +274,7 @@ const run = async () => {
     })
 
     await collection.createIndex({ location: '2dsphere' })
-    await collection.createIndex({ device_id: 1, pinged_at: -1 })
+    await collection.createIndex({ device_id: 1, pinged_at: -1 }, { unique: true })
     await collection.createIndex(
       { pinged_at: 1 },
       { expireAfterSeconds: 60 * 60 * 24 * 90 }

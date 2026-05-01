@@ -12,16 +12,16 @@ export const list = async (req, res, next) => {
     const pagination = {
       offset:  parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
       limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by: req.query.sort_by || 'created_at',
-      order:   req.query.order   || 'desc'
+      sort_by: req.query.sortBy || 'created_at',
+      order:   req.query.order  || 'desc'
     }
 
     const filters = {
-      system_role:   req.query.system_role,
-      first_name:    req.query.first_name,
-      last_name:     req.query.last_name,
-      district_slug: req.query.district_slug,
-      province_slug: req.query.province_slug
+      system_role:   req.query.systemRole,
+      first_name:    req.query.firstName,
+      last_name:     req.query.lastName,
+      district_slug: req.query.districtSlug,
+      province_slug: req.query.provinceSlug
     }
 
     const result = await userService.listUsers(pagination, filters, req.user)

@@ -1,9 +1,10 @@
 import { Router } from 'express'
 import * as vehicleController from './vehicle.controller.js'
+import { liveLocation, locationHistory } from '../locations/location.controller.js'
 import { verifyJWT } from '../../middleware/auth.js'
 import { requirePermission } from '../../middleware/rbac.js'
 import { validateBody, validateParams, validateQuery } from '../../middleware/validate.js'
-import { standardLimiter } from '../../middleware/rateLimiter.js'
+import { standardLimiter, locationLimiter } from '../../middleware/rateLimiter.js'
 import {
   vehicleParamsSchema,
   assignmentParamsSchema,
@@ -14,6 +15,7 @@ import {
   createAssignmentSchema,
   closeAssignmentSchema
 } from './vehicle.validator.js'
+import { locationHistoryQuerySchema } from '../locations/location.validator.js'
 
 const router = Router()
 
@@ -50,6 +52,23 @@ router.patch(
   validateParams(vehicleParamsSchema),
   validateBody(updateVehicleSchema),
   vehicleController.update
+)
+
+router.get(
+  '/:registrationNumber/live-location',
+  locationLimiter,
+  requirePermission('vehicles:location:read'),
+  validateParams(vehicleParamsSchema),
+  liveLocation
+)
+
+router.get(
+  '/:registrationNumber/location-history',
+  locationLimiter,
+  requirePermission('vehicles:history:read'),
+  validateParams(vehicleParamsSchema),
+  validateQuery(locationHistoryQuerySchema),
+  locationHistory
 )
 
 router.get(

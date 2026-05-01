@@ -13,27 +13,27 @@ export const assignmentParamsSchema = Joi.object({
 })
 
 export const vehicleQuerySchema = Joi.object({
-  registration_number: Joi.string().max(20).optional(),
-  owner_nic:           Joi.string().max(20).optional(),
-  owner_name:          Joi.string().max(200).optional(),
-  police_status:       Joi.string().valid(...validStatuses).optional(),
-  make_model:          Joi.string().max(100).optional(),
-  has_device:          Joi.boolean().optional(),
-  ds_division_id:      Joi.string().uuid().optional(),
-  district_id:         Joi.string().uuid().optional(),
-  province_id:         Joi.string().uuid().optional(),
-  offset:              Joi.number().integer().min(0).default(0),
-  limit:               Joi.number().integer().min(1).max(100).default(20),
-  sort_by:             Joi.string().valid('registration_number', 'owner_nic', 'police_status', 'created_at').default('created_at'),
-  order:               Joi.string().valid('asc', 'desc').default('desc')
+  registrationNumber: Joi.string().max(20).optional(),
+  ownerNic:           Joi.string().max(20).optional(),
+  ownerName:          Joi.string().max(200).optional(),
+  policeStatus:       Joi.string().valid(...validStatuses).optional(),
+  makeModel:          Joi.string().max(100).optional(),
+  hasDevice:          Joi.boolean().optional(),
+  dsDivisionId:       Joi.string().uuid().optional(),
+  districtId:         Joi.string().uuid().optional(),
+  provinceId:         Joi.string().uuid().optional(),
+  offset:             Joi.number().integer().min(0).default(0),
+  limit:              Joi.number().integer().min(1).max(100).default(20),
+  sortBy:             Joi.string().valid('registration_number', 'owner_nic', 'police_status', 'created_at').default('created_at'),
+  order:              Joi.string().valid('asc', 'desc').default('desc')
 })
 
 export const assignmentQuerySchema = Joi.object({
-  active_only: Joi.boolean().optional(),
-  sort_by:     Joi.string().valid('assigned_date').default('assigned_date'),
-  order:       Joi.string().valid('asc', 'desc').default('desc'),
-  offset:      Joi.number().integer().min(0).default(0),
-  limit:       Joi.number().integer().min(1).max(100).default(20)
+  activeOnly: Joi.boolean().optional(),
+  sortBy:     Joi.string().valid('assigned_date').default('assigned_date'),
+  order:      Joi.string().valid('asc', 'desc').default('desc'),
+  offset:     Joi.number().integer().min(0).default(0),
+  limit:      Joi.number().integer().min(1).max(100).default(20)
 })
 
 export const createVehicleSchema = Joi.object({

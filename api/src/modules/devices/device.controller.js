@@ -5,12 +5,12 @@ import { PAGINATION } from '../../config/constants.js'
 export const list = async (req, res, next) => {
   try {
     const pagination = {
-      admin_status:  req.query.admin_status  || undefined,
-      serial_number: req.query.serial_number?.trim() || undefined,
+      admin_status:  req.query.adminStatus  || undefined,
+      serial_number: req.query.serialNumber?.trim() || undefined,
       offset:        parseInt(req.query.offset) || PAGINATION.DEFAULT_OFFSET,
       limit:         Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by:       req.query.sort_by || 'created_at',
-      order:         req.query.order   || 'desc'
+      sort_by:       req.query.sortBy || 'created_at',
+      order:         req.query.order  || 'desc'
     }
 
     const result = await deviceService.listDevices(pagination)

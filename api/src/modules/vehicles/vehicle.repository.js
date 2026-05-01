@@ -1,6 +1,5 @@
 import db from '../../db/postgres.js'
 
-// Columns selected for all public-facing vehicle responses
 const VEHICLE_COLUMNS = [
   'v.vehicle_id',
   'v.vehicle_reference_id',
@@ -68,6 +67,21 @@ export const findByRegistrationNumber = async (registrationNumber) => {
     .first()
 }
 
+export const findDeviceIdByRegistrationNumber = async (registrationNumber) => {
+  return db('vehicles as v')
+    .where({ 'v.registration_number': registrationNumber })
+    .whereNull('v.deleted_at')
+    .select('v.vehicle_id', 'v.device_id')
+    .first()
+}
+
+export const findByDeviceIds = async (deviceIds) => {
+  return db('vehicles as v')
+    .whereIn('v.device_id', deviceIds)
+    .whereNull('v.deleted_at')
+    .select('v.device_id', 'v.registration_number', 'v.police_status')
+}
+
 export const findByReferenceId = async (referenceId) => {
   return db('vehicles').where({ vehicle_reference_id: referenceId }).whereNull('deleted_at').first()
 }
@@ -103,9 +117,6 @@ export const update = async (vehicleId, vehicleData) => {
   return updated
 }
 
-// ─────────────────────────────────────────────
-// ASSIGNMENTS
-// ─────────────────────────────────────────────
 
 export const findAssignmentsByVehicle = async (vehicleId, pagination) => {
   const { active_only, offset, limit, sort_by, order } = pagination

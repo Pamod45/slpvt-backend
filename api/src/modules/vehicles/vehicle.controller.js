@@ -5,22 +5,22 @@ import { PAGINATION } from '../../config/constants.js'
 export const list = async (req, res, next) => {
   try {
     const filters = {
-      registration_number: req.query.registration_number?.trim() || undefined,
-      owner_nic:           req.query.owner_nic?.trim()           || undefined,
-      owner_name:          req.query.owner_name?.trim()          || undefined,
-      police_status:       req.query.police_status               || undefined,
-      make_model:          req.query.make_model?.trim()          || undefined,
-      has_device:          req.query.has_device,
-      ds_division_id:      req.query.ds_division_id              || undefined,
-      district_id:         req.query.district_id                 || undefined,
-      province_id:         req.query.province_id                 || undefined
+      registration_number: req.query.registrationNumber?.trim() || undefined,
+      owner_nic:           req.query.ownerNic?.trim()           || undefined,
+      owner_name:          req.query.ownerName?.trim()          || undefined,
+      police_status:       req.query.policeStatus               || undefined,
+      make_model:          req.query.makeModel?.trim()          || undefined,
+      has_device:          req.query.hasDevice,
+      ds_division_id:      req.query.dsDivisionId               || undefined,
+      district_id:         req.query.districtId                 || undefined,
+      province_id:         req.query.provinceId                 || undefined
     }
 
     const pagination = {
       offset:  parseInt(req.query.offset) || PAGINATION.DEFAULT_OFFSET,
       limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by: req.query.sort_by || 'created_at',
-      order:   req.query.order   || 'desc'
+      sort_by: req.query.sortBy || 'created_at',
+      order:   req.query.order  || 'desc'
     }
 
     const result = await vehicleService.listVehicles(filters, pagination)
@@ -53,11 +53,11 @@ export const update = async (req, res, next) => {
 export const listAssignments = async (req, res, next) => {
   try {
     const pagination = {
-      active_only: req.query.active_only,
+      active_only: req.query.activeOnly,
       offset:      parseInt(req.query.offset) || PAGINATION.DEFAULT_OFFSET,
       limit:       Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by:     req.query.sort_by || 'assigned_date',
-      order:       req.query.order   || 'desc'
+      sort_by:     req.query.sortBy || 'assigned_date',
+      order:       req.query.order  || 'desc'
     }
 
     const result = await vehicleService.getVehicleAssignments(req.params['registrationNumber'], pagination)

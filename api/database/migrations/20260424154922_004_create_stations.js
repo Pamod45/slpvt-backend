@@ -2,10 +2,12 @@
  * Stations table migration
  * Each station belongs to a district and has a type
  * Stations have a jurisdiction boundary polygon
+ * Partial unique indexes on name and short_code exclude soft-deleted rows
+ * so a deleted station's identifiers can be reused
  */
 
-export const up = function (knex) {
-  return knex.schema.createTable('stations', (table) => {
+export const up = async function (knex) {
+  await knex.schema.createTable('stations', (table) => {
     table
       .uuid('station_id')
       .primary()
@@ -43,7 +45,6 @@ export const up = function (knex) {
     table
       .string('name', 150)
       .notNullable()
-      .unique()
 
     table
       .string('contact_number', 20)
@@ -52,7 +53,6 @@ export const up = function (knex) {
     table
       .string('short_code', 10)
       .notNullable()
-      .unique()
       .comment('Short code for the station e.g. COL-001, KAN-001')
 
     table
@@ -73,6 +73,18 @@ export const up = function (knex) {
       .defaultTo(null)
       .comment('Soft delete timestamp — null means active, set to deletion time when deactivated')
   })
+
+  await knex.raw(`
+    CREATE UNIQUE INDEX stations_short_code_active_unique
+    ON stations (short_code)
+    WHERE deleted_at IS NULL
+  `)
+
+  await knex.raw(`
+    CREATE UNIQUE INDEX stations_name_active_unique
+    ON stations (name)
+    WHERE deleted_at IS NULL
+  `)
 }
 
 export const down = function (knex) {
