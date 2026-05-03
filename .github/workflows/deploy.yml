@@ -32,6 +32,7 @@ jobs:
             else
               echo "    Repo found — fetching latest changes..."
               cd /home/ec2-user/Deployments/slpvt-backend
+              git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Pamod45/slpvt-backend.git
               git fetch origin main
               git reset --hard origin/main
             fi
