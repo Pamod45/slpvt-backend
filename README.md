@@ -22,7 +22,7 @@ In Development
 | Resource | URL |
 |----------|-----|
 | **API Base URL** | http://52.66.55.28/slpvt/v1 |
-| **API Documentation (Swagger)** | https://app.swaggerhub.com/apis/nibm-01e/slpvt-api-specification/1.0.0#/ |
+| **API Documentation (Swagger)** | https://app.swaggerhub.com/apis/nibm-01e/slpvt-api-specification/1.0.1#/ |
 
 > The Swagger specification is published under a trial SwaggerHub account and will expire **31 May 2026**.
 
