@@ -10,12 +10,11 @@ const PUBLIC_COLUMNS = [
 ]
 
 export const findAll = async (filters, pagination) => {
-  const { license_number, reference_id, first_name, last_name, police_status, license_expired } = filters
+  const { reference_id, first_name, last_name, police_status, license_expired } = filters
   const { offset, limit, sort_by, order } = pagination
 
   const query = db('drivers').whereNull('deleted_at')
 
-  if (license_number)           query.where('driving_license_number',  'ilike', `%${license_number}%`)
   if (reference_id)             query.where('driver_reference_id',     'ilike', `%${reference_id}%`)
   if (first_name)               query.where('first_name',              'ilike', `%${first_name}%`)
   if (last_name)                query.where('last_name',               'ilike', `%${last_name}%`)

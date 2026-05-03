@@ -9,7 +9,6 @@ export const deviceParamsSchema = Joi.object({
 
 export const deviceQuerySchema = Joi.object({
   adminStatus:  Joi.string().valid(...validStatuses).optional(),
-  serialNumber: Joi.string().max(100).optional(),
   offset:       Joi.number().integer().min(0).default(0),
   limit:        Joi.number().integer().min(1).max(100).default(20),
   sortBy:       Joi.string().valid('serial_number', 'issued_date', 'admin_status', 'created_at').default('created_at'),

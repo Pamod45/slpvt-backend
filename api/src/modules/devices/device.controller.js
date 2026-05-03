@@ -6,7 +6,6 @@ export const list = async (req, res, next) => {
   try {
     const pagination = {
       admin_status:  req.query.adminStatus  || undefined,
-      serial_number: req.query.serialNumber?.trim() || undefined,
       offset:        parseInt(req.query.offset) || PAGINATION.DEFAULT_OFFSET,
       limit:         Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
       sort_by:       req.query.sortBy || 'created_at',

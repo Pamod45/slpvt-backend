@@ -1,5 +1,5 @@
 import * as vehicleRepository from './vehicle.repository.js'
-import { findById as findDeviceById } from '../devices/device.repository.js'
+import { findBySerialNumber as findDeviceBySerialNumber } from '../devices/device.repository.js'
 import { findBySlug as findDsDivisionBySlug } from '../divisional-secretariats/divisional-secretariat.repository.js'
 import { NotFoundError, ConflictError, ForbiddenError, ValidationError } from '../../utils/errors.js'
 
@@ -21,6 +21,7 @@ const format = (row) => ({
   make_model:           row.make_model,
   police_status:        row.police_status,
   owner: {
+    nic:    row.owner_nic,
     name:   row.owner_full_name,
     mobile: row.owner_contact ?? null
   },
@@ -58,32 +59,42 @@ export const registerVehicle = async (data) => {
   if (byChassis)   throw new ConflictError('A vehicle with this chassis number already exists')
   if (!dsDivision) throw new NotFoundError('Divisional secretariat not found')
 
-  return vehicleRepository.create({ ...vehicleData, ds_division_id: dsDivision.ds_division_id })
+  await vehicleRepository.create({ ...vehicleData, ds_division_id: dsDivision.ds_division_id })
+  const created = await vehicleRepository.findByRegistrationNumber(data.registration_number)
+  return format(created)
 }
 
 export const updateVehicle = async (registrationNumber, data, user) => {
   const vehicle = await vehicleRepository.findByRegistrationNumber(registrationNumber)
   if (!vehicle) throw new NotFoundError('Vehicle not found')
 
-  if (data.device_id !== undefined) {
+  if (data.device_serial_number !== undefined) {
     if (!DEVICE_MANAGERS.includes(user.role)) {
       throw new ForbiddenError('Only Provincial Officers and above can assign devices to vehicles')
     }
 
-    if (data.device_id !== null) {
-      const device = await findDeviceById(data.device_id)
+    if (data.device_serial_number !== null) {
+      const device = await findDeviceBySerialNumber(data.device_serial_number)
       if (!device) throw new NotFoundError('Device not found')
       if (device.admin_status !== 'ACTIVE') {
         throw new ValidationError('Only ACTIVE devices can be assigned to vehicles')
       }
 
-      const existing = await vehicleRepository.findByDeviceId(data.device_id)
+      const existing = await vehicleRepository.findByDeviceId(device.device_id)
       if (existing && existing.vehicle_id !== vehicle.vehicle_id) {
         throw new ConflictError('This device is already assigned to another vehicle')
       }
+
+      data.device_id = device.device_id
+    } else {
+      data.device_id = null
     }
+
+    delete data.device_serial_number
   }
 
-  return vehicleRepository.update(vehicle.vehicle_id, data)
+  await vehicleRepository.update(vehicle.vehicle_id, data)
+  const updated = await vehicleRepository.findByRegistrationNumber(registrationNumber)
+  return format(updated)
 }
 

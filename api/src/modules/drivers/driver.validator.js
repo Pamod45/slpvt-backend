@@ -8,7 +8,6 @@ export const driverParamsSchema = Joi.object({
 })
 
 export const driverQuerySchema = Joi.object({
-  licenseNumber:  Joi.string().max(50).optional(),
   referenceId:    Joi.string().max(15).optional(),
   firstName:      Joi.string().max(100).optional(),
   lastName:       Joi.string().max(100).optional(),

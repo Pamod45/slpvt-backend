@@ -11,9 +11,9 @@ export const list = async (req, res, next) => {
       police_status:       req.query.policeStatus               || undefined,
       make_model:          req.query.makeModel?.trim()          || undefined,
       has_device:          req.query.hasDevice,
-      ds_division_id:      req.query.dsDivisionId               || undefined,
-      district_id:         req.query.districtId                 || undefined,
-      province_id:         req.query.provinceId                 || undefined
+      ds_division_slug:    req.query.dsDivisionSlug?.trim()      || undefined,
+      district_slug:       req.query.districtSlug?.trim()        || undefined,
+      province_slug:       req.query.provinceSlug?.trim()        || undefined
     }
 
     const pagination = {

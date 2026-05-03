@@ -1314,9 +1314,9 @@ paths:
           application/json:
             example:
               badge_number: SLP-00009
-              password: Secure@9999
-              first_name: Amara
-              last_name: Kumara
+              password: Test@1234
+              first_name: Pubudu
+              last_name: Perera
               system_role: STATION_OFFICER
               station_short_code: COL001
       responses:
@@ -1384,12 +1384,14 @@ paths:
           required: true
           schema:
             type: string
-            example: SLP-00005
+            example: SLP-00009
       requestBody:
         required: true
         content:
           application/json:
             example:
+              first_name: Pubudu
+              last_name: Perera
               system_role: PROVINCIAL_COMMANDER
               station_short_code: CPRANGE
       responses:
@@ -1426,7 +1428,7 @@ paths:
           required: true
           schema:
             type: string
-            example: SLP-00001
+            example: SLP-00009
       responses:
         "200":
           description: User soft deleted
@@ -1509,10 +1511,6 @@ paths:
           schema:
             type: string
             enum: [ACTIVE, UNDER_REPAIR, DECOMMISSIONED]
-        - name: serialNumber
-          in: query
-          schema:
-            type: string
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/sortByParam'
@@ -1549,8 +1547,8 @@ paths:
         content:
           application/json:
             example:
-              serial_number: SN-TRK-00201
-              issued_date: "2026-05-01"
+              serial_number: SN-TRK-00211
+              issued_date: "2026-05-03"
               admin_status: ACTIVE
       responses:
         "201":
@@ -1585,7 +1583,7 @@ paths:
           required: true
           schema:
             type: string
-            example: SN-TRK-00001
+            example: TRK-SL-00001
       responses:
         "200":
           description: Device record
@@ -1594,7 +1592,7 @@ paths:
               example:
                 data:
                   device_id: 770e8400-e29b-41d4-a716-446655440000
-                  serial_number: SN-TRK-00001
+                  serial_number: TRK-SL-00001
                   issued_date: "2026-01-15"
                   admin_status: ACTIVE
         "401":
@@ -1616,7 +1614,7 @@ paths:
           required: true
           schema:
             type: string
-            example: SN-TRK-00001
+            example: TRK-SL-00001
       requestBody:
         required: true
         content:
@@ -1793,7 +1791,7 @@ paths:
           required: true
           schema:
             type: string
-          example: WP AAB-1234
+          example: WP AAB-3485
       responses:
         "200":
           description: Vehicle record
@@ -1843,7 +1841,7 @@ paths:
           required: true
           schema:
             type: string
-          example: WP AAB-1234
+          example: WP ZZZ-9999
       requestBody:
         required: true
         content:
@@ -1889,7 +1887,7 @@ paths:
           required: true
           schema:
             type: string
-          example: WP AAB-1234
+          example: WP AAB-3485
       responses:
         "200":
           description: Latest ping location
@@ -1944,21 +1942,23 @@ paths:
           required: true
           schema:
             type: string
-          example: WP AAB-1234
+          example: SP AJD-8597
         - name: from
           in: query
           description: Start of time window (ISO 8601). Defaults to 1 hour before to.
           schema:
             type: string
             format: date-time
-            example: "2026-04-25T00:00:00Z"
+            example: "2026-04-28T00:00:00Z"
+          example: "2026-04-28T00:00:00Z"
         - name: to
           in: query
           description: End of time window (ISO 8601). Defaults to now.
           schema:
             type: string
             format: date-time
-            example: "2026-04-26T00:00:00Z"
+            example: "2026-05-01T00:00:00Z"
+          example: "2026-05-01T00:00:00Z"
         - name: lat
           in: query
           description: Latitude of the center point for spatial filtering. Requires lng and radius.
@@ -1966,6 +1966,7 @@ paths:
             type: number
             minimum: -90
             maximum: 90
+          example: 7.2
         - name: lng
           in: query
           description: Longitude of the center point for spatial filtering. Requires lat and radius.
@@ -1973,6 +1974,7 @@ paths:
             type: number
             minimum: -180
             maximum: 180
+          example: 80.6
         - name: radius
           in: query
           description: Radius in meters for spatial filtering. Maximum 50000. Requires lat and lng.
@@ -1980,6 +1982,7 @@ paths:
             type: integer
             minimum: 1
             maximum: 50000
+          example: 5000
         - $ref: '#/components/parameters/offsetParam'
         - name: limit
           in: query
@@ -2038,7 +2041,7 @@ paths:
           required: true
           schema:
             type: string
-          example: WP AAB-1234
+          example: WP ZZZ-9999
         - name: activeOnly
           in: query
           description: When true, returns only the current active assignment.
@@ -2091,14 +2094,14 @@ paths:
           required: true
           schema:
             type: string
-          example: WP AAB-1234
+          example: WP ZZZ-9999
       requestBody:
         required: true
         content:
           application/json:
             example:
-              license_number: B000005
-              assigned_date: "2026-05-01"
+              license_number: B000181
+              assigned_date: "2026-05-02"
       responses:
         "201":
           description: Assignment created
@@ -2133,19 +2136,19 @@ paths:
           required: true
           schema:
             type: string
-          example: WP AAB-1234
+          example: WP ZZZ-9999
         - name: licenseNumber
           in: path
           required: true
           schema:
             type: string
-          example: B000005
+          example: B000181
       requestBody:
         required: true
         content:
           application/json:
             example:
-              returned_date: "2026-05-02"
+              returned_date: "2026-05-03"
       responses:
         "200":
           description: Assignment closed
@@ -2336,6 +2339,55 @@ paths:
           $ref: '#/components/responses/NotFound'
         "422":
           $ref: '#/components/responses/ValidationError'
+  
+  /drivers/{licenseNumber}/assignments:
+    get:
+      tags: [Drivers]
+      summary: List vehicle assignments for a driver
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: licenseNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: B000001
+        - name: activeOnly
+          in: query
+          description: When true, returns only the current active assignment.
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of assignments
+          content:
+            application/json:
+              example:
+                count: 2
+                offset: 0
+                limit: 20
+                next: null
+                previous: null
+                data:
+                  - assigned_date: "2026-03-01"
+                    returned_date: "2026-04-01"
+                    registration_number: WP AAB-1234
+                    vehicle_police_status: CLEAN
+                  - assigned_date: "2026-04-02"
+                    returned_date: null
+                    registration_number: WP AAC-9050
+                    vehicle_police_status: CLEAN
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
 
   /locations:
     post:

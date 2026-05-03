@@ -8,6 +8,7 @@ const VEHICLE_COLUMNS = [
   'v.color',
   'v.make_model',
   'v.police_status',
+  'v.owner_nic',
   'v.owner_full_name',
   'v.owner_contact',
   'td.serial_number  as device_serial_number',
@@ -32,7 +33,7 @@ const BASE_QUERY = () =>
 export const findAll = async (filters, pagination) => {
   const {
     registration_number, owner_nic, owner_name, police_status,
-    make_model, has_device, ds_division_id, district_id, province_id
+    make_model, has_device, ds_division_slug, district_slug, province_slug
   } = filters
   const { offset, limit, sort_by, order } = pagination
 
@@ -45,9 +46,9 @@ export const findAll = async (filters, pagination) => {
   if (make_model)          query.where('v.make_model',          'ilike', `%${make_model}%`)
   if (has_device === true)  query.whereNotNull('v.device_id')
   if (has_device === false) query.whereNull('v.device_id')
-  if (ds_division_id)      query.where('v.ds_division_id', ds_division_id)
-  if (district_id)         query.where('d.district_id',    district_id)
-  if (province_id)         query.where('p.province_id',    province_id)
+  if (ds_division_slug)    query.where('ds.ds_division_slug', ds_division_slug)
+  if (district_slug)       query.where('d.district_slug',     district_slug)
+  if (province_slug)       query.where('p.province_slug',     province_slug)
 
   const total = await query.clone().count('v.vehicle_id as count').first()
 
