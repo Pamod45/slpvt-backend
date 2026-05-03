@@ -30,7 +30,7 @@ app.use(cors())
 app.use(morgan('dev', { stream: { write: httpLogger } }))
 app.use(express.json())
 
-// redirect trailing slashes to non-trailing slashes (except root /)
+// redirect trailing slashes to non-trailing slashes (except root /) *
 app.use((req, res, next) => {
   if (req.path.endsWith('/') && req.path.length > 1) {
     const query = req.url.slice(req.path.length)
