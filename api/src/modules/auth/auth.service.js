@@ -170,7 +170,7 @@ export const logout = async (rawRefreshToken) => {
   const tokenRecord = await findRefreshToken(rawRefreshToken)
 
   if (!tokenRecord) {
-    return
+    throw new UnauthorizedError('Invalid refresh token')
   }
 
   await deleteRefreshToken(tokenRecord.token_id)

@@ -33,3 +33,13 @@ export const refreshSchema = Joi.object({
       'any.required': 'Refresh token is required'
     })
 })
+
+export const logoutSchema = Joi.object({
+  refresh_token: Joi.string()
+    .trim()
+    .required()
+    .messages({
+      'string.empty': 'Refresh token is required',
+      'any.required': 'Refresh token is required'
+    })
+})

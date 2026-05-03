@@ -8,7 +8,7 @@ import { Router } from 'express'
 import * as authController from './auth.controller.js'
 import { validateBody } from '../../middleware/validate.js'
 import { authLimiter } from '../../middleware/rateLimiter.js'
-import { loginSchema, refreshSchema } from './auth.validator.js'
+import { loginSchema, refreshSchema, logoutSchema } from './auth.validator.js'
 
 const router = Router()
 
@@ -31,6 +31,8 @@ router.post(
 // POST /api/v1/auth/logout
 router.post(
   '/logout',
+  authLimiter,
+  validateBody(logoutSchema),
   authController.logout
 )
 
