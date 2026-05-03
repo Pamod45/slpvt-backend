@@ -4,15 +4,18 @@ import { PAGINATION } from '../../config/constants.js'
 
 export const list = async (req, res, next) => {
   try {
-    const pagination = {
-      admin_status:  req.query.adminStatus  || undefined,
-      offset:        parseInt(req.query.offset) || PAGINATION.DEFAULT_OFFSET,
-      limit:         Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by:       req.query.sortBy || 'created_at',
-      order:         req.query.order  || 'desc'
+    const filters = {
+      admin_status: req.query.adminStatus || undefined
     }
 
-    const result = await deviceService.listDevices(pagination)
+    const pagination = {
+      offset:  parseInt(req.query.offset) || PAGINATION.DEFAULT_OFFSET,
+      limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
+      sort_by: req.query.sortBy || 'created_at',
+      order:   req.query.order  || 'desc'
+    }
+
+    const result = await deviceService.listDevices(filters, pagination)
 
     res.status(200).set('X-Total-Count', result.count).json(paginated(req, result.data, result.count, pagination))
   } catch (err) { next(err) }

@@ -7,8 +7,9 @@ const SAFE_COLUMNS = [
   'admin_status'
 ]
 
-export const findAll = async (pagination) => {
-  const { admin_status, offset, limit, sort_by, order } = pagination
+export const findAll = async (filters, pagination) => {
+  const { admin_status } = filters
+  const { offset, limit, sort_by, order } = pagination
 
   const query = db('tracking_devices')
 
@@ -16,7 +17,7 @@ export const findAll = async (pagination) => {
 
   const total = await query.clone().count('device_id as count').first()
 
-  const data = await query
+  const data = await query.clone()
     .select(['serial_number', 'issued_date', 'admin_status'])
     .orderBy(sort_by, order)
     .limit(limit)

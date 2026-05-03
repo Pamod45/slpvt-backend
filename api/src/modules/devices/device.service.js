@@ -9,8 +9,8 @@ const generateApiKey = () => {
   return { rawKey, hash }
 }
 
-export const listDevices = async (pagination) => {
-  return deviceRepository.findAll(pagination)
+export const listDevices = async (filters, pagination) => {
+  return deviceRepository.findAll(filters, pagination)
 }
 
 export const getDevice = async (serialNumber) => {
