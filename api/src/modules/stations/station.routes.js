@@ -6,6 +6,7 @@
 
 import { Router } from 'express'
 import * as stationController from './station.controller.js'
+import { listByStation } from '../users/user.controller.js'
 import { verifyJWT } from '../../middleware/auth.js'
 import { requirePermission } from '../../middleware/rbac.js'
 import { validateBody, validateParams, validateQuery } from '../../middleware/validate.js'
@@ -69,7 +70,7 @@ router.get(
   requirePermission('users:read'),
   validateParams(stationShortCodeParamsSchema),
   validateQuery(stationUsersQuerySchema),
-  stationController.getUsers
+  listByStation
 )
 
 

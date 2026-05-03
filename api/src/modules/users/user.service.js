@@ -5,7 +5,7 @@
 
 import bcrypt from 'bcrypt'
 import * as userRepository from './user.repository.js'
-import { findByShortCode as findStationByShortCode } from '../stations/station.repository.js'
+import { findByShortCode as findStationByShortCode, findByShortCode as findStationForScope } from '../stations/station.repository.js'
 import { NotFoundError, ConflictError, ForbiddenError, ValidationError } from '../../utils/errors.js'
 import { ROLE_CREATION_CEILING, ROLE_SCOPE, SCOPE_TO_STATION_TYPE } from '../../config/constants.js'
 
@@ -161,6 +161,30 @@ export const updatePassword = async (badgeNumber, oldPassword, newPassword, exec
   await userRepository.update(user.badge_number, { password_hash: hashed })
   
   return { success: true }
+}
+
+export const listUsersByStation = async (shortCode, pagination, user) => {
+  const station = await findStationForScope(shortCode)
+
+  if (!station) throw new NotFoundError('Station not found')
+
+  if (user.role !== 'SUPER_ADMIN') {
+    if (user.role === 'PROVINCIAL_COMMANDER') {
+      if (station.resolved_province_id !== user.province_id) {
+        throw new ForbiddenError('This station is outside your province')
+      }
+    } else if (user.role === 'DISTRICT_COMMANDER') {
+      if (station.resolved_district_id !== user.district_id) {
+        throw new ForbiddenError('This station is outside your district')
+      }
+    } else if (user.role === 'STATION_COMMANDER') {
+      if (station.station_id !== user.assigned_station_id) {
+        throw new ForbiddenError('You can only view users at your assigned station')
+      }
+    }
+  }
+
+  return userRepository.findAllByStation(station.station_id, pagination)
 }
 
 export const deleteUser = async (badgeNumber, executorRole) => {

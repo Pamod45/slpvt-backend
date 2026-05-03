@@ -31,8 +31,3 @@ export const updateDriverStatus = async (licenseNumber, data) => {
   return format(await driverRepository.update(driver.driver_id, data))
 }
 
-export const getDriverAssignments = async (licenseNumber, pagination) => {
-  const driver = await driverRepository.findByLicenseNumber(licenseNumber)
-  if (!driver) throw new NotFoundError('Driver not found')
-  return driverRepository.findAssignmentsByDriver(driver.driver_id, pagination)
-}

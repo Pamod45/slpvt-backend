@@ -48,6 +48,13 @@ const errorHandler = (err, req, res, next) => {
     )
   }
 
+  // Malformed JSON body — Express body-parser parse failure
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json(
+      error(400, 'Invalid JSON', 'The request body contains malformed JSON')
+    )
+  }
+
   // JWT errors
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json(

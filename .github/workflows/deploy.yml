@@ -17,12 +17,34 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ec2-user/Deployments/slpvt-backend/api
-            git fetch origin main
-            git reset --hard origin/main
-            npm install --legacy-peer-deps
+            echo "================================================================"
+            echo " SLPVT DEPLOYMENT STARTED"
+            echo " $(date '+%Y-%m-%d %H:%M:%S')"
+            echo "================================================================"
 
-            # Write environment file from secrets
+            echo ""
+            echo ">>> [1/9] Pulling latest code from main..."
+            if [ ! -d "/home/ec2-user/Deployments/slpvt-backend/.git" ]; then
+              echo "    Repo not found — cloning for the first time..."
+              mkdir -p /home/ec2-user/Deployments
+              git clone https://github.com/Pamod45/slpvt-backend.git /home/ec2-user/Deployments/slpvt-backend
+              echo "    Cloned successfully"
+            else
+              echo "    Repo found — fetching latest changes..."
+              cd /home/ec2-user/Deployments/slpvt-backend
+              git fetch origin main
+              git reset --hard origin/main
+            fi
+            cd /home/ec2-user/Deployments/slpvt-backend/api
+            echo "    Done — $(git log -1 --format='%h %s')"
+
+            echo ""
+            echo ">>> [2/9] Installing dependencies..."
+            npm install --legacy-peer-deps
+            echo "    Done"
+
+            echo ""
+            echo ">>> [3/9] Writing .env from secrets..."
             cat > .env << 'ENVEOF'
             NODE_ENV=production
             PORT=${{ secrets.PORT }}
@@ -37,11 +59,15 @@ jobs:
             JWT_EXPIRES_IN=${{ secrets.JWT_EXPIRES_IN }}
             JWT_REFRESH_EXPIRES_IN=${{ secrets.JWT_REFRESH_EXPIRES_IN }}
             ENVEOF
+            echo "    Done"
 
-            # Run migrations — knex tracks what has already run, safe every deploy
+            echo ""
+            echo ">>> [4/9] Running PostgreSQL migrations..."
             npx knex migrate:latest
+            echo "    Done"
 
-            # Only seed if provinces table is empty
+            echo ""
+            echo ">>> [5/9] Checking PostgreSQL seed data..."
             EXISTING=$(PGPASSWORD=${{ secrets.PG_PASSWORD }} psql \
               -h ${{ secrets.PG_HOST }} \
               -U ${{ secrets.PG_USER }} \
@@ -49,15 +75,15 @@ jobs:
               -t -c "SELECT COUNT(*) FROM provinces;" 2>/dev/null | tr -d ' ')
 
             if [ "$EXISTING" = "0" ] || [ -z "$EXISTING" ]; then
-              echo "Database empty, running seeds..."
+              echo "    Provinces table is empty — running seeds..."
               npm run seed
+              echo "    Seeds complete"
             else
-              echo "Database already has data, skipping seeds."
+              echo "    Provinces table already has $EXISTING rows — skipping seeds"
             fi
 
-            # Check MongoDB collections and seed if needed
-            cd /home/ec2-user/Deployments/slpvt-backend/api
-
+            echo ""
+            echo ">>> [6/9] Checking MongoDB district boundaries..."
             DISTRICT_COUNT=$(node --input-type=module << 'JSEOF'
             import mongoose from './node_modules/mongoose/index.js'
             import 'dotenv/config'
@@ -69,12 +95,15 @@ jobs:
             )
 
             if [ "$DISTRICT_COUNT" = "0" ] || [ -z "$DISTRICT_COUNT" ]; then
-              echo "Districts collection empty, seeding district boundaries..."
+              echo "    districts collection is empty — seeding district boundaries..."
               node scripts/seedDistrictBoundaries.js
+              echo "    District boundaries seeded"
             else
-              echo "Districts already seeded ($DISTRICT_COUNT records), skipping."
+              echo "    districts collection already has $DISTRICT_COUNT records — skipping"
             fi
 
+            echo ""
+            echo ">>> [7/9] Checking MongoDB DS division boundaries..."
             DS_COUNT=$(node --input-type=module << 'JSEOF'
             import mongoose from './node_modules/mongoose/index.js'
             import 'dotenv/config'
@@ -86,12 +115,15 @@ jobs:
             )
 
             if [ "$DS_COUNT" = "0" ] || [ -z "$DS_COUNT" ]; then
-              echo "DS boundaries collection empty, seeding..."
+              echo "    divisional_secretariats collection is empty — seeding DS boundaries..."
               node scripts/seedDSBoundaries.js
+              echo "    DS boundaries seeded"
             else
-              echo "DS boundaries already seeded ($DS_COUNT records), skipping."
+              echo "    divisional_secretariats collection already has $DS_COUNT records — skipping"
             fi
 
+            echo ""
+            echo ">>> [8/9] Checking MongoDB location pings..."
             PING_COUNT=$(node --input-type=module << 'JSEOF'
             import mongoose from './node_modules/mongoose/index.js'
             import 'dotenv/config'
@@ -103,21 +135,30 @@ jobs:
             )
 
             if [ "$PING_COUNT" -lt 1000000 ] 2>/dev/null; then
-              echo "location_pings has $PING_COUNT records (< 1M), running ping simulator..."
+              echo "    location_pings has $PING_COUNT records (< 1M) — running ping simulator..."
               node scripts/pingSimulator.js
+              echo "    Ping simulation complete"
             else
-              echo "location_pings already has $PING_COUNT records, skipping simulator."
+              echo "    location_pings already has $PING_COUNT records — skipping simulator"
             fi
 
-            # Restart if running, start fresh if not
+            echo ""
+            echo ">>> [9/9] Restarting API process and Nginx..."
             if pm2 describe slpvt-api > /dev/null 2>&1; then
               pm2 restart slpvt-api
+              echo "    PM2 process restarted"
             else
               pm2 start src/server.js --name slpvt-api
+              echo "    PM2 process started fresh"
             fi
-
             pm2 save
             sudo systemctl restart nginx
+            echo "    Nginx restarted"
+
+            echo ""
+            echo "================================================================"
+            echo " DEPLOYMENT COMPLETE — $(date '+%Y-%m-%d %H:%M:%S')"
+            echo "================================================================"
 
       - name: Verify deployment
         uses: appleboy/ssh-action@v1.0.3
@@ -126,5 +167,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo ""
+            echo ">>> Health check..."
             sleep 5
-            curl -f http://localhost:3000/api/v1/ && echo "Deployment successful" || echo "Health check failed"
+            curl -f http://localhost:3000/api/v1/ && echo "    Health check passed" || echo "    Health check failed"

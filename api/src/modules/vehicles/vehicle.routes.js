@@ -1,6 +1,11 @@
 import { Router } from 'express'
 import * as vehicleController from './vehicle.controller.js'
 import { liveLocation, locationHistory } from '../locations/location.controller.js'
+import {
+  listVehicleAssignments,
+  createVehicleAssignment,
+  closeVehicleAssignment
+} from '../assignments/assignment.controller.js'
 import { verifyJWT } from '../../middleware/auth.js'
 import { requirePermission } from '../../middleware/rbac.js'
 import { validateBody, validateParams, validateQuery } from '../../middleware/validate.js'
@@ -77,7 +82,7 @@ router.get(
   requirePermission('vehicles:read'),
   validateParams(vehicleParamsSchema),
   validateQuery(assignmentQuerySchema),
-  vehicleController.listAssignments
+  listVehicleAssignments
 )
 
 router.post(
@@ -86,7 +91,7 @@ router.post(
   requirePermission('assignments:create'),
   validateParams(vehicleParamsSchema),
   validateBody(createAssignmentSchema),
-  vehicleController.createAssignment
+  createVehicleAssignment
 )
 
 router.patch(
@@ -95,7 +100,7 @@ router.patch(
   requirePermission('assignments:update'),
   validateParams(assignmentParamsSchema),
   validateBody(closeAssignmentSchema),
-  vehicleController.closeAssignment
+  closeVehicleAssignment
 )
 
 export default router

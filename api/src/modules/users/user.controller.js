@@ -58,6 +58,30 @@ export const updatePassword = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
+export const listByStation = async (req, res, next) => {
+  try {
+    const pagination = {
+      offset:  parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
+      limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
+      sort_by: req.query.sortBy || 'created_at',
+      order:   req.query.order  || 'desc'
+    }
+
+    const result = await userService.listUsersByStation(
+      req.params['shortCode'],
+      pagination,
+      req.user
+    )
+
+    res
+      .status(200)
+      .set('X-Total-Count', result.count)
+      .json(paginated(req, result.data, result.count, pagination))
+  } catch (err) {
+    next(err)
+  }
+}
+
 export const softDelete = async (req, res, next) => {
   try {
     const user = await userService.deleteUser(req.params['badgeNumber'], req.user.role)

@@ -4,9 +4,9 @@
  */
 
 import * as districtRepository from './district.repository.js'
+import * as provinceRepository from '../provinces/province.repository.js'
 import { NotFoundError } from '../../utils/errors.js'
 import { formatDistrict } from './district.presenter.js'
-import { formatDivisionalSecretariat } from '../divisional-secretariats/divisional-secretariat.presenter.js'
 
 export const listDistricts = async (pagination) => {
   const result = await districtRepository.findAll(pagination)
@@ -26,20 +26,13 @@ export const getDistrictBySlug = async (districtSlug) => {
   return formatDistrict(district)
 }
 
-export const getDistrictDivisionalSecretariats = async (districtSlug, pagination) => {
-  const district = await districtRepository.findBySlug(districtSlug)
+export const listDistrictsByProvince = async (provinceSlug, pagination) => {
+  const province = await provinceRepository.findBySlug(provinceSlug)
 
-  if (!district) {
-    throw new NotFoundError('District not found')
-  }
+  if (!province) throw new NotFoundError('Province not found')
 
-  const result = await districtRepository.findDivisionalSecretariatsByDistrict(district.district_id, pagination)
+  const result = await districtRepository.findAllByProvinceId(province.province_id, pagination)
 
-  return {
-    district_id:   district.district_id,
-    district_name: district.name,
-    district_slug: district.district_slug,
-    count:         result.count,
-    data:          result.data.map(formatDivisionalSecretariat)
-  }
+  return { count: result.count, data: result.data.map(formatDistrict) }
 }
+

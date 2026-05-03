@@ -47,31 +47,3 @@ export const getByProvinceSlug = async (req, res, next) => {
   }
 }
 
-// ─────────────────────────────────────────────
-// GET /api/v1/provinces/:provinceSlug/districts
-// ─────────────────────────────────────────────
-
-export const getDistricts = async (req, res, next) => {
-  try {
-    // const result = await provinceService.getProvinceDistricts(req.params['provinceSlug'])
-
-    const pagination = {
-      offset:  parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
-      limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by: req.query.sortBy || 'name',
-      order:   req.query.order  || 'asc'
-    }
-
-    const result = await provinceService.getProvinceDistricts(
-      req.params['provinceSlug'],
-      pagination
-    )
-
-    res
-      .status(200)
-      .set('X-Total-Count', result.count)
-      .json(paginated(req, result.data, result.count, pagination))
-  } catch (err) {
-    next(err)
-  }
-}

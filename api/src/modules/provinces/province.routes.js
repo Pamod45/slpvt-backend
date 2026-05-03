@@ -6,10 +6,10 @@
 
 import { Router } from 'express'
 import * as provinceController from './province.controller.js'
+import { getDistrictsByProvince } from '../districts/district.controller.js'
 import { verifyJWT } from '../../middleware/auth.js'
 import { requirePermission } from '../../middleware/rbac.js'
-import { ROLES } from '../../config/constants.js'
-import { validateBody, validateParams, validateQuery } from '../../middleware/validate.js'
+import { validateParams, validateQuery } from '../../middleware/validate.js'
 import { standardLimiter } from '../../middleware/rateLimiter.js'
 import {
   provinceParamsSchema,
@@ -45,7 +45,7 @@ router.get(
   verifyJWT,
   requirePermission('provinces:read'),
   validateParams(provinceParamsSchema),
-  provinceController.getDistricts
+  getDistrictsByProvince
 )
 
 

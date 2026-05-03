@@ -33,6 +33,33 @@ export const list = async (req, res, next) => {
 }
 
 // ─────────────────────────────────────────────
+// GET /api/v1/districts/:districtSlug/divisional-secretariats
+// ─────────────────────────────────────────────
+
+export const getDivisionalSecretariatsByDistrict = async (req, res, next) => {
+  try {
+    const pagination = {
+      offset:  parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
+      limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
+      sort_by: req.query.sortBy || 'name',
+      order:   req.query.order  || 'asc'
+    }
+
+    const result = await dsService.listDivisionalSecretariatsByDistrict(
+      req.params['districtSlug'],
+      pagination
+    )
+
+    res
+      .status(200)
+      .set('X-Total-Count', result.count)
+      .json(paginated(req, result.data, result.count, pagination))
+  } catch (err) {
+    next(err)
+  }
+}
+
+// ─────────────────────────────────────────────
 // GET /api/v1/divisional-secretariats/:dsSlug
 // ─────────────────────────────────────────────
 

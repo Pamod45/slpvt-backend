@@ -58,29 +58,6 @@ export const update = async (req, res, next) => {
     next(err)
   }
 }
-export const getUsers = async (req, res, next) => {
-  try {
-    const pagination = {
-      offset:  parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
-      limit:   Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by: req.query.sortBy || 'created_at',
-      order:   req.query.order  || 'desc'
-    }
-
-    const result = await stationService.getStationUsers(
-      req.params['shortCode'],
-      pagination,
-      req.user
-    )
-
-    res
-      .status(200)
-      .set('X-Total-Count', result.count)
-      .json(paginated(req, result.data, result.count, pagination))
-  } catch (err) {
-    next(err)
-  }
-}
 export const remove = async (req, res, next) => {
   try {
     await stationService.deleteStation(req.params['shortCode'])

@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import * as driverController from './driver.controller.js'
+import { listDriverAssignments } from '../assignments/assignment.controller.js'
 import { verifyJWT } from '../../middleware/auth.js'
 import { requirePermission } from '../../middleware/rbac.js'
 import { validateBody, validateParams, validateQuery } from '../../middleware/validate.js'
@@ -55,7 +56,7 @@ router.get(
   requirePermission('drivers:read'),
   validateParams(driverParamsSchema),
   validateQuery(driverAssignmentQuerySchema),
-  driverController.listAssignments
+  listDriverAssignments
 )
 
 export default router

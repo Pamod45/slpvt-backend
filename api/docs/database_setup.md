@@ -6,7 +6,7 @@ Before running any database commands make sure the following are installed and r
 
 - Node.js 18+
 - Docker Desktop
-- All dependencies installed via `npm install`
+- All dependencies installed via `npm install` (run from the `api/` directory)
 - `.env` file configured (copy from `.env.example` and fill in values)
 
 ---
@@ -27,7 +27,7 @@ You should see:
 
 ```
 slpvt_postgres   — PostgreSQL 15 on port 5432
-slpvt_mongo      — MongoDB 6 on port 27017
+slpvt_mongo      — MongoDB 7 on port 27017
 ```
 
 ---
@@ -60,17 +60,16 @@ npx knex migrate:rollback
 001_create_provinces.js
 002_create_districts.js
 003_create_divisional_secretariats.js
-004_create_station_types.js
-005_create_stations.js
-006_create_users.js
-007_create_tracking_devices.js
-008_create_vehicles.js
-009_create_drivers.js
-010_create_vehicle_driver_assignments.js
-011_create_refresh_tokens.js
+004_create_stations.js
+005_create_users.js
+006_create_tracking_devices.js
+007_create_vehicles.js
+008_create_drivers.js
+009_create_vehicle_driver_assignments.js
+010_create_refresh_tokens.js
 ```
 
-> The order matters due to foreign key dependencies. Provinces must exist before districts, districts before stations, and so on. Knex handles this automatically via the timestamp prefix ordering.
+> The order matters due to foreign key dependencies. Provinces must exist before districts, districts before stations, and so on. Knex handles this automatically via the timestamp prefix ordering. Station type is stored as an enum column within the `stations` table — there is no separate station types table.
 
 ---
 
@@ -97,15 +96,14 @@ npx knex seed:run --specific=01_provinces.js
 | `01_provinces.js` | All 9 Sri Lanka provinces | 9 |
 | `02_districts.js` | All 25 districts mapped to provinces | 25 |
 | `03_divisional_secretariats.js` | 29 DS divisions across 6 districts | 29 |
-| `04_station_types.js` | Police Headquarters, Range Office, Main Station, Police Post | 4 |
-| `05_stations.js` | 39 stations across all hierarchy levels | 39 |
-| `06_users.js` | One test user per system role | 7 |
-| `07_tracking_devices.js` | 210 GPS devices with hashed API keys | 210 |
-| `08_vehicles.js` | 205 tuk-tuks across Western, Central, Southern provinces | 205 |
-| `09_drivers.js` | 210 drivers with Sri Lankan details | 210 |
-| `10_vehicle_driver_assignments.js` | 205 active driver-vehicle assignments | 205 |
+| `04_stations.js` | 39 stations across all hierarchy levels | 39 |
+| `05_users.js` | One test user per system role | 8 |
+| `06_tracking_devices.js` | 210 GPS devices with hashed API keys | 210 |
+| `07_vehicles.js` | 205 tuk-tuks across Western, Central, Southern provinces | 205 |
+| `08_drivers.js` | 210 drivers with Sri Lankan details | 210 |
+| `09_vehicle_driver_assignments.js` | 205 active driver-vehicle assignments | 205 |
 
-> Raw device API keys are saved to `data/device_keys.json` after running `07_tracking_devices.js`. This file is excluded from Git and is for local development use only. Never commit raw API keys.
+> Raw device API keys are saved to `api/data/device_keys.json` after running `06_tracking_devices.js`. This file is excluded from Git and is for local development use only. Never commit raw API keys.
 
 ---
 
@@ -209,9 +207,10 @@ Password: Test@1234
 | SLP-00002 | PROVINCIAL_COMMANDER | Western Province |
 | SLP-00003 | PROVINCIAL_OFFICER | Western Province |
 | SLP-00004 | DISTRICT_COMMANDER | Colombo District |
-| SLP-00005 | STATION_COMMANDER | Colombo Police Post |
-| SLP-00006 | STATION_OFFICER | Colombo Police Post |
-| SLP-00007 | DATA_REGISTRAR | No boundary scope |
+| SLP-00005 | DISTRICT_OFFICER | Colombo District |
+| SLP-00006 | STATION_COMMANDER | Colombo Police Post |
+| SLP-00007 | STATION_OFFICER | Colombo Police Post |
+| SLP-00008 | DATA_REGISTRAR | No boundary scope |
 
 ---
 
@@ -224,7 +223,6 @@ docker exec -it slpvt_postgres psql -U slpvt_user -d slpvt_dev -c "
 SELECT 'provinces' as table_name, COUNT(*) FROM provinces
 UNION ALL SELECT 'districts', COUNT(*) FROM districts
 UNION ALL SELECT 'divisional_secretariats', COUNT(*) FROM divisional_secretariats
-UNION ALL SELECT 'station_types', COUNT(*) FROM station_types
 UNION ALL SELECT 'stations', COUNT(*) FROM stations
 UNION ALL SELECT 'users', COUNT(*) FROM users
 UNION ALL SELECT 'tracking_devices', COUNT(*) FROM tracking_devices
@@ -237,16 +235,15 @@ ORDER BY table_name;"
 Expected counts:
 
 ```
-divisional_secretariats  |  29
-districts                |  25
-drivers                  | 210
-provinces                |   9
-station_types            |   4
-stations                 |  39
-tracking_devices         | 210
-users                    |   7
+divisional_secretariats   |  29
+districts                 |  25
+drivers                   | 210
+provinces                 |   9
+stations                  |  39
+tracking_devices          | 210
+users                     |   8
 vehicle_driver_assignments| 205
-vehicles                 | 205
+vehicles                  | 205
 ```
 
 ### MongoDB

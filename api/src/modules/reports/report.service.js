@@ -24,7 +24,7 @@ const enforceScope = (user, provinceId, districtId) => {
   }
 }
 
-export const calculateBoundaryCrossings = async (query, user) => {
+export const xcalculateBoundaryCrossings = async (query, user) => {
   const { provinceSlug, districtSlug, dsDivisionSlug, from, to } = query
   const fromDate = new Date(from)
   const toDate = new Date(to)

@@ -5,6 +5,7 @@
 
 import { Router } from 'express'
 import * as districtController from './district.controller.js'
+import { getDivisionalSecretariatsByDistrict } from '../divisional-secretariats/divisional-secretariat.controller.js'
 import { verifyJWT } from '../../middleware/auth.js'
 import { requirePermission } from '../../middleware/rbac.js'
 import { validateParams, validateQuery } from '../../middleware/validate.js'
@@ -43,7 +44,7 @@ router.get(
   verifyJWT,
   requirePermission('districts:read'),
   validateParams(districtParamsSchema),
-  districtController.getDivisionalSecretariats
+  getDivisionalSecretariatsByDistrict
 )
 
 export default router

@@ -2,12 +2,15 @@ openapi: 3.0.3
 
 info:
   title: SLPVT API
-  description: Sri Lanka Police Vehicle Tracking System — REST API for managing stations, vehicles, drivers, tracking devices, and GPS location data.
+  description: Sri Lanka Police Vehicle Tracking System. A REST API for managing stations, vehicles, drivers, tracking devices, and GPS location data.
   version: 1.0.0
   contact:
     name: SLPVT Development Team
 
 servers:
+  # Added by API Auto Mocking Plugin
+  - description: AWS Deployed server 
+    url: http://52.66.55.28/slpvt/v1
   - url: http://localhost:3000/api/v1
     description: Local development server
 
@@ -149,12 +152,15 @@ components:
         name:
           type: string
           example: Colombo
-        province_slug:
-          type: string
-          example: western
-        province_name:
-          type: string
-          example: Western
+        province:
+          type: object
+          properties:
+            province_slug:
+              type: string
+              example: western
+            name:
+              type: string
+              example: Western
         ds_division_count:
           type: integer
           example: 7
@@ -168,18 +174,24 @@ components:
         name:
           type: string
           example: Colombo
-        district_slug:
-          type: string
-          example: colombo
-        district_name:
-          type: string
-          example: Colombo
-        province_slug:
-          type: string
-          example: western
-        province_name:
-          type: string
-          example: Western
+        district:
+          type: object
+          properties:
+            district_slug:
+              type: string
+              example: colombo
+            name:
+              type: string
+              example: Colombo
+        province:
+          type: object
+          properties:
+            province_slug:
+              type: string
+              example: western
+            name:
+              type: string
+              example: Western
 
     Station:
       type: object
@@ -276,9 +288,6 @@ components:
     User:
       type: object
       properties:
-        user_id:
-          type: string
-          format: uuid
         badge_number:
           type: string
           example: SLP-00001
@@ -289,7 +298,7 @@ components:
         system_role:
           type: string
           enum: [SUPER_ADMIN, PROVINCIAL_COMMANDER, PROVINCIAL_OFFICER, DISTRICT_COMMANDER, DISTRICT_OFFICER, STATION_COMMANDER, STATION_OFFICER, DATA_REGISTRAR, DEVICE_CLIENT]
-        assigned_station_id:
+        station_short_code:
           type: string
           format: uuid
           nullable: true
@@ -314,9 +323,6 @@ components:
     Vehicle:
       type: object
       properties:
-        vehicle_id:
-          type: string
-          format: uuid
         vehicle_reference_id:
           type: string
           example: REF00001
@@ -334,24 +340,53 @@ components:
         police_status:
           type: string
           enum: [CLEAN, STOLEN, WANTED, SUSPENDED]
-        owner_full_name:
-          type: string
-        owner_contact:
-          type: string
+        owner:
+          type: object
+          properties:
+            name:
+              type: string
+            mobile:
+              type: string
+              nullable: true
+        device:
+          type: object
           nullable: true
-        device_serial_number:
-          type: string
-          nullable: true
-        device_admin_status:
-          type: string
-          nullable: true
-          enum: [ACTIVE, UNDER_REPAIR, DECOMMISSIONED]
-        ds_division_name:
-          type: string
-        district_name:
-          type: string
-        province_name:
-          type: string
+          properties:
+            serial_number:
+              type: string
+            issued_date:
+              type: string
+              format: date-time
+            admin_status:
+              type: string
+              enum: [ACTIVE, UNDER_REPAIR, DECOMMISSIONED]
+        location:
+          type: object
+          properties:
+            province:
+              type: object
+              nullable: true
+              properties:
+                name:
+                  type: string
+                province_slug:
+                  type: string
+            district:
+              type: object
+              nullable: true
+              properties:
+                name:
+                  type: string
+                district_slug:
+                  type: string
+            divisional_secretariat:
+              type: object
+              nullable: true
+              properties:
+                name:
+                  type: string
+                ds_division_slug:
+                  type: string
 
     Driver:
       type: object
@@ -547,7 +582,7 @@ paths:
                 password:
                   type: string
                   format: password
-                  example: Test@1234
+                  example: testpassword
       responses:
         "200":
           description: Login successful
@@ -627,12 +662,8 @@ paths:
                 refresh_token:
                   type: string
       responses:
-        "200":
+        "204":
           description: Logged out successfully
-          content:
-            application/json:
-              example:
-                message: Logged out successfully
         "401":
           $ref: '#/components/responses/Unauthorized'
 
@@ -732,8 +763,9 @@ paths:
                 data:
                   - district_slug: colombo
                     name: Colombo
-                    province_slug: western
-                    province_name: Western
+                    province:
+                      province_slug: western
+                      name: Western
                     ds_division_count: 7
         "401":
           $ref: '#/components/responses/Unauthorized'
@@ -764,13 +796,14 @@ paths:
                 count: 25
                 offset: 0
                 limit: 20
-                next: /api/v1/districts?offset=20&limit=20
+                next: /slpvt/v1/districts?offset=20&limit=20&order=asc
                 previous: null
                 data:
                   - district_slug: colombo
                     name: Colombo
-                    province_slug: western
-                    province_name: Western
+                    province:
+                      province_slug: western
+                      name: Western
                     ds_division_count: 7
         "401":
           $ref: '#/components/responses/Unauthorized'
@@ -797,8 +830,9 @@ paths:
                 data:
                   district_slug: colombo
                   name: Colombo
-                  province_slug: western
-                  province_name: Western
+                  province:
+                    province_slug: western
+                    name: Western
                   ds_division_count: 7
         "401":
           $ref: '#/components/responses/Unauthorized'
@@ -836,10 +870,12 @@ paths:
                 data:
                   - ds_division_slug: colombo
                     name: Colombo
-                    district_slug: colombo
-                    district_name: Colombo
-                    province_slug: western
-                    province_name: Western
+                    district:
+                      district_slug: colombo
+                      name: Colombo
+                    province:
+                      province_slug: western
+                      name: Western
         "401":
           $ref: '#/components/responses/Unauthorized'
         "404":
@@ -866,18 +902,20 @@ paths:
           content:
             application/json:
               example:
-                count: 331
+                count: 29
                 offset: 0
                 limit: 20
-                next: /api/v1/divisional-secretariats?offset=20&limit=20
+                next: /slpvt/v1/divisional-secretariats?offset=20&limit=20&order=asc
                 previous: null
                 data:
-                  - ds_division_slug: colombo
-                    name: Colombo
-                    district_slug: colombo
-                    district_name: Colombo
-                    province_slug: western
-                    province_name: Western
+                  - ds_division_slug: ambalangoda
+                    name: Ambalangoda
+                    district:
+                      district_slug: galle
+                      name: Galle
+                    province:
+                      province_slug: southern
+                      name: Southern
         "401":
           $ref: '#/components/responses/Unauthorized'
 
@@ -903,10 +941,12 @@ paths:
                 data:
                   ds_division_slug: colombo
                   name: Colombo
-                  district_slug: colombo
-                  district_name: Colombo
-                  province_slug: western
-                  province_name: Western
+                  district:
+                    district_slug: colombo
+                    name: Colombo
+                  province:
+                    province_slug: western
+                    name: Western
         "401":
           $ref: '#/components/responses/Unauthorized'
         "404":
@@ -1162,6 +1202,51 @@ paths:
                 description: null
                 errors: []
 
+  /stations/{shortCode}/users:
+    get:
+      tags: [Stations]
+      summary: List users assigned to a station
+      description: Returns a paginated list of active users assigned to the given station. Scope is enforced — commanders can only view users within their jurisdiction.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: shortCode
+          in: path
+          required: true
+          schema:
+            type: string
+            example: COL001
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/sortByParam'
+        - $ref: '#/components/parameters/orderParam'
+      responses:
+        "200":
+          description: Paginated list of users at the station
+          content:
+            application/json:
+              example:
+                count: 2
+                offset: 0
+                limit: 20
+                next: null
+                previous: null
+                data:
+                  - badge_number: SLP-00006
+                    first_name: Priya
+                    last_name: Jayawardena
+                    system_role: STATION_COMMANDER
+                  - badge_number: SLP-00007
+                    first_name: Dilshan
+                    last_name: Wickramasinghe
+                    system_role: STATION_OFFICER
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
   /users:
     get:
       tags: [Users]
@@ -1207,12 +1292,11 @@ paths:
                 next: null
                 previous: null
                 data:
-                  - user_id: 550e8400-e29b-41d4-a716-446655440000
-                    badge_number: SLP-00001
+                  - badge_number: SLP-00001
                     first_name: Rohan
                     last_name: Perera
                     system_role: SUPER_ADMIN
-                    assigned_station_id: null
+                    station_short_code: null
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -1242,12 +1326,11 @@ paths:
             application/json:
               example:
                 data:
-                  user_id: 661e9511-f30c-52e5-b827-557766551111
                   badge_number: SLP-00009
                   first_name: Amara
                   last_name: Kumara
                   system_role: STATION_OFFICER
-                  assigned_station_id: some-uuid
+                  station_short_code: COL001
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -1277,12 +1360,11 @@ paths:
             application/json:
               example:
                 data:
-                  user_id: 550e8400-e29b-41d4-a716-446655440000
                   badge_number: SLP-00001
                   first_name: Rohan
                   last_name: Perera
                   system_role: SUPER_ADMIN
-                  assigned_station_id: null
+                  station_short_code: null
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -1290,9 +1372,10 @@ paths:
         "404":
           $ref: '#/components/responses/NotFound'
 
-    put:
+    patch:
       tags: [Users]
       summary: Update a user
+      description: Updates one or more fields of an existing user. Officers can only update their own first and last name. Commanders can update role and station assignment for users below their ceiling.
       security:
         - BearerAuth: []
       parameters:
@@ -1301,16 +1384,14 @@ paths:
           required: true
           schema:
             type: string
-            example: SLP-00001
+            example: SLP-00005
       requestBody:
         required: true
         content:
           application/json:
             example:
-              first_name: Rohan
-              last_name: Perera
-              system_role: STATION_COMMANDER
-              station_short_code: COL001
+              system_role: PROVINCIAL_COMMANDER
+              station_short_code: CPRANGE
       responses:
         "200":
           description: User updated
@@ -1319,12 +1400,11 @@ paths:
               example:
                 message: User updated successfully
                 data:
-                  user_id: 550e8400-e29b-41d4-a716-446655440000
-                  badge_number: SLP-00001
-                  first_name: Rohan
+                  badge_number: SLP-00005
+                  first_name: Pubudu
                   last_name: Perera
-                  system_role: STATION_COMMANDER
-                  assigned_station_id: some-uuid
+                  system_role: PROVINCIAL_COMMANDER
+                  station_short_code: CPRANGE
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -1349,17 +1429,73 @@ paths:
             example: SLP-00001
       responses:
         "200":
-          description: User deleted
+          description: User soft deleted
           content:
             application/json:
               example:
-                message: User deleted successfully
+                message: User soft deleted successfully
+                data:
+                  success: true
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
           $ref: '#/components/responses/Forbidden'
         "404":
           $ref: '#/components/responses/NotFound'
+
+  /users/{badgeNumber}/password:
+    put:
+      tags: [Users]
+      summary: Change own password
+      description: Allows an officer to change their own password. The requesting user must match the badge number in the path — officers cannot change another user's password.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: badgeNumber
+          in: path
+          required: true
+          schema:
+            type: string
+            example: SLP-00002
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password:
+                  type: string
+                  format: password
+                new_password:
+                  type: string
+                  format: password
+            example:
+              old_password: Test@1234
+              new_password: Test@12345
+      responses:
+        "200":
+          description: Password changed successfully
+          content:
+            application/json:
+              example:
+                message: Password updated successfully
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: Old password does not match or attempting to change another user's password
+          content:
+            application/json:
+              example:
+                code: 403
+                message: Old password does not match
+                description: null
+                errors: []
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
 
   /devices:
     get:
@@ -1569,23 +1705,32 @@ paths:
                 count: 205
                 offset: 0
                 limit: 20
-                next: /api/v1/vehicles?offset=20&limit=20
+                next: /slpvt/v1/vehicles?offset=20&limit=20&order=asc
                 previous: null
                 data:
-                  - vehicle_id: 991e8400-e29b-41d4-a716-446655440000
-                    vehicle_reference_id: REF00001
-                    registration_number: WP AAB-1234
-                    chassis_number: CHASSIS00000001
-                    color: Yellow
+                  - vehicle_reference_id: REF00003
+                    registration_number: WP AAC-9050
+                    chassis_number: CHASSIS00000003
+                    color: Orange
                     make_model: Bajaj RE
                     police_status: CLEAN
-                    owner_full_name: Nuwan Perera
-                    owner_contact: "+94771234567"
-                    device_serial_number: SN-TRK-00001
-                    device_admin_status: ACTIVE
-                    ds_division_name: Colombo
-                    district_name: Colombo
-                    province_name: Western
+                    owner:
+                      name: Harsha Amarasinghe
+                      mobile: "+94751523748"
+                    device:
+                      serial_number: TRK-SL-00003
+                      issued_date: "2026-01-09T00:00:00.000Z"
+                      admin_status: ACTIVE
+                    location:
+                      province:
+                        name: Western
+                        province_slug: western
+                      district:
+                        name: Kalutara
+                        district_slug: kalutara
+                      divisional_secretariat:
+                        name: Ingiriya
+                        ds_division_slug: ingiriya
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -1610,7 +1755,7 @@ paths:
               owner_nic: "199012345678"
               owner_full_name: Kamal Silva
               owner_contact: "+94772345678"
-              ds_division_id: some-uuid
+              ds_division_slug: colombo
       responses:
         "201":
           description: Vehicle registered
@@ -1618,7 +1763,6 @@ paths:
             application/json:
               example:
                 data:
-                  vehicle_id: aa2e9511-f30c-52e5-b827-557766553333
                   vehicle_reference_id: REF00206
                   registration_number: WP ZZZ-9999
                   chassis_number: CHASSIS00000206
@@ -1657,17 +1801,29 @@ paths:
             application/json:
               example:
                 data:
-                  vehicle_id: 991e8400-e29b-41d4-a716-446655440000
+                  vehicle_reference_id: REF00001
                   registration_number: WP AAB-1234
+                  chassis_number: CHASSIS00000001
                   color: Yellow
                   make_model: Bajaj RE
                   police_status: CLEAN
-                  owner_full_name: Nuwan Perera
-                  device_serial_number: SN-TRK-00001
-                  device_admin_status: ACTIVE
-                  ds_division_name: Colombo
-                  district_name: Colombo
-                  province_name: Western
+                  owner:
+                    name: Nuwan Perera
+                    mobile: "+94771234567"
+                  device:
+                    serial_number: TRK-SL-00001
+                    issued_date: "2026-01-15T00:00:00.000Z"
+                    admin_status: ACTIVE
+                  location:
+                    province:
+                      name: Western
+                      province_slug: western
+                    district:
+                      name: Colombo
+                      district_slug: colombo
+                    divisional_secretariat:
+                      name: Colombo
+                      ds_division_slug: colombo
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -1702,8 +1858,17 @@ paths:
               example:
                 message: Vehicle updated successfully
                 data:
-                  registration_number: WP AAB-1234
+                  vehicle_id: b300bea8-1b20-401b-a61b-b5b2b8c1da3e
+                  vehicle_reference_id: REF00003
+                  registration_number: WP AAC-9050
+                  chassis_number: CHASSIS00000003
+                  color: Orange
+                  make_model: Bajaj RE
                   police_status: STOLEN
+                  owner_full_name: Harsha Amarasinghe
+                  owner_contact: "+94751523748"
+                  ds_division_id: e5cdf515-f829-4757-abbf-f0c2fc2643c3
+                  device_id: 7090c89d-db14-4a0e-96b2-f788270e0a97
         "401":
           $ref: '#/components/responses/Unauthorized'
         "403":
@@ -1942,8 +2107,6 @@ paths:
               example:
                 data:
                   assignment_id: bb3f0622-g41d-63f6-c938-668877664444
-                  vehicle_id: 991e8400-e29b-41d4-a716-446655440000
-                  driver_id: cc4g1733-h52e-74g7-d049-779988775555
                   assigned_date: "2026-05-01"
                   returned_date: null
         "401":
@@ -2136,7 +2299,7 @@ paths:
         "404":
           $ref: '#/components/responses/NotFound'
 
-    put:
+    patch:
       tags: [Drivers]
       summary: Update a driver police status
       security:
@@ -2255,7 +2418,7 @@ paths:
         "429":
           $ref: '#/components/responses/RateLimit'
 
-  /locations/live-locations:
+  /live-locations:
     get:
       tags: [Locations]
       summary: Get live vehicle locations within a jurisdiction
@@ -2289,7 +2452,7 @@ paths:
                 count: 43
                 offset: 0
                 limit: 20
-                next: /api/v1/locations/live-locations?districtSlug=colombo&offset=20&limit=20
+                next: /slpvt/v1/live-locations?districtSlug=colombo&offset=20&limit=20
                 previous: null
                 data:
                   - registration_number: WP AAB-1234

@@ -129,6 +129,26 @@ export const update = async (badgeNumber, userData) => {
   return updatedUser
 }
 
+export const findAllByStation = async (stationId, pagination) => {
+  const { offset, limit, sort_by, order } = pagination
+
+  const total = await db('users')
+    .where({ assigned_station_id: stationId })
+    .whereNull('deleted_at')
+    .count('user_id as count')
+    .first()
+
+  const data = await db('users')
+    .where({ assigned_station_id: stationId })
+    .whereNull('deleted_at')
+    .select('badge_number', 'first_name', 'last_name', 'system_role')
+    .orderBy(sort_by, order)
+    .limit(limit)
+    .offset(offset)
+
+  return { count: parseInt(total.count), data }
+}
+
 export const markDeletedAt = async (badgeNumber) => {
   const [deletedUser] = await db('users')
     .where({ badge_number: badgeNumber })

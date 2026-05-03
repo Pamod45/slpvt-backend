@@ -39,6 +39,30 @@ export const findAll = async (pagination) => {
   }
 }
 
+export const findAllByDistrictId = async (districtId, pagination) => {
+  const { offset, limit, sort_by, order } = pagination
+
+  const total = await db('divisional_secretariats').where({ district_id: districtId }).count('ds_division_id as count').first()
+
+  const data = await db('divisional_secretariats as ds')
+    .leftJoin('districts as d', 'ds.district_id', 'd.district_id')
+    .leftJoin('provinces as p', 'd.province_id', 'p.province_id')
+    .where({ 'ds.district_id': districtId })
+    .select(
+      'ds.ds_division_slug',
+      'ds.name',
+      'd.district_slug',
+      'd.name as district_name',
+      'p.province_slug',
+      'p.name as province_name'
+    )
+    .orderBy(`ds.${sort_by}`, order)
+    .limit(limit)
+    .offset(offset)
+
+  return { count: parseInt(total.count), data }
+}
+
 export const findBySlug = async (dsSlug) => {
   return db('divisional_secretariats as ds')
     .leftJoin('districts as d', 'ds.district_id', 'd.district_id')

@@ -47,18 +47,3 @@ export const updateStatus = async (req, res, next) => {
   } catch (err) { next(err) }
 }
 
-export const listAssignments = async (req, res, next) => {
-  try {
-    const pagination = {
-      active_only: req.query.activeOnly,
-      offset:      parseInt(req.query.offset) || PAGINATION.DEFAULT_OFFSET,
-      limit:       Math.min(parseInt(req.query.limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT),
-      sort_by:     req.query.sortBy || 'assigned_date',
-      order:       req.query.order  || 'desc'
-    }
-
-    const result = await driverService.getDriverAssignments(req.params['licenseNumber'], pagination)
-
-    res.status(200).set('X-Total-Count', result.count).json(paginated(req, result.data, result.count, pagination))
-  } catch (err) { next(err) }
-}

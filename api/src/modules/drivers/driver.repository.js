@@ -84,30 +84,3 @@ export const update = async (driverId, driverData) => {
   return updated
 }
 
-export const findAssignmentsByDriver = async (driverId, pagination) => {
-  const { active_only, offset, limit, sort_by, order } = pagination
-
-  const query = db('vehicle_driver_assignments as vda')
-    .join('vehicles as v', 'vda.vehicle_id', 'v.vehicle_id')
-    .where({ 'vda.driver_id': driverId })
-    .whereNull('v.deleted_at')
-
-  if (active_only) query.whereNull('vda.returned_date')
-
-  const total = await query.clone().count('vda.assignment_id as count').first()
-
-  const data = await query
-    .select(
-      'vda.assigned_date',
-      'vda.returned_date',
-      'v.registration_number',
-      'v.make_model',
-      'v.color',
-      'v.police_status as vehicle_police_status'
-    )
-    .orderBy(`vda.${sort_by}`, order)
-    .limit(limit)
-    .offset(offset)
-
-  return { count: parseInt(total.count), data }
-}

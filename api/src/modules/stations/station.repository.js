@@ -103,20 +103,3 @@ export const update = async (stationId, stationData) => {
   return updatedStation
 }
 
-export const findUsersByStation = async (stationId, pagination) => {
-  const { offset, limit, sort_by, order } = pagination
-  
-  const total = await db('users').where({ assigned_station_id: stationId, deleted_at: null }).count('user_id as count').first()
-
-  const data = await db('users')
-    .where({ assigned_station_id: stationId, deleted_at: null })
-    .select('badge_number', 'first_name', 'last_name', 'system_role')
-    .orderBy(sort_by, order)
-    .limit(limit)
-    .offset(offset)
-
-  return {
-    count: parseInt(total.count),
-    data
-  }
-}

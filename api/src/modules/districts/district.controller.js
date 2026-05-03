@@ -47,10 +47,10 @@ export const getByDistrictSlug = async (req, res, next) => {
 }
 
 // ─────────────────────────────────────────────
-// GET /api/v1/districts/:districtSlug/divisional-secretariats
+// GET /api/v1/provinces/:provinceSlug/districts
 // ─────────────────────────────────────────────
 
-export const getDivisionalSecretariats = async (req, res, next) => {
+export const getDistrictsByProvince = async (req, res, next) => {
   try {
     const pagination = {
       offset:  parseInt(req.query.offset)  || PAGINATION.DEFAULT_OFFSET,
@@ -59,8 +59,8 @@ export const getDivisionalSecretariats = async (req, res, next) => {
       order:   req.query.order  || 'asc'
     }
 
-    const result = await districtService.getDistrictDivisionalSecretariats(
-      req.params['districtSlug'],
+    const result = await districtService.listDistrictsByProvince(
+      req.params['provinceSlug'],
       pagination
     )
 
@@ -72,3 +72,4 @@ export const getDivisionalSecretariats = async (req, res, next) => {
     next(err)
   }
 }
+

@@ -63,29 +63,27 @@ export const findIdsByProvinceId = async (provinceId) => {
     .pluck('district_id')
 }
 
-export const findDivisionalSecretariatsByDistrict = async (districtId, pagination) => {
+export const findAllByProvinceId = async (provinceId, pagination) => {
   const { offset, limit, sort_by, order } = pagination
-  
-  const total = await db('divisional_secretariats').where({ district_id: districtId }).count('ds_division_id as count').first()
 
-  const data = await db('divisional_secretariats as ds')
-    .leftJoin('districts as d', 'ds.district_id', 'd.district_id')
-    .leftJoin('provinces as p', 'd.province_id', 'p.province_id')
-    .where({ 'ds.district_id': districtId })
+  const total = await db('districts').where({ province_id: provinceId }).count('district_id as count').first()
+
+  const data = await db('districts')
+    .leftJoin('provinces', 'districts.province_id', 'provinces.province_id')
+    .leftJoin('divisional_secretariats as ds', 'districts.district_id', 'ds.district_id')
+    .where({ 'districts.province_id': provinceId })
     .select(
-      'ds.ds_division_slug',
-      'ds.name',
-      'd.district_slug',
-      'd.name as district_name',
-      'p.province_slug',
-      'p.name as province_name'
+      'districts.district_slug',
+      'districts.name',
+      'provinces.province_slug',
+      'provinces.name as province_name',
+      db.raw('COUNT(ds.ds_division_id) as ds_division_count')
     )
-    .orderBy(`ds.${sort_by}`, order)
+    .groupBy('districts.district_id', 'provinces.province_id')
+    .orderBy(`districts.${sort_by}`, order)
     .limit(limit)
     .offset(offset)
 
-  return {
-    count: parseInt(total.count),
-    data
-  }
+  return { count: parseInt(total.count), data }
 }
+
