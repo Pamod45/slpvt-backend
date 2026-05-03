@@ -1650,10 +1650,6 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - name: registrationNumber
-          in: query
-          schema:
-            type: string
         - name: ownerNic
           in: query
           schema:
@@ -1675,21 +1671,18 @@ paths:
           in: query
           schema:
             type: boolean
-        - name: dsDivisionId
+        - name: dsDivisionSlug
           in: query
           schema:
             type: string
-            format: uuid
-        - name: districtId
+        - name: districtSlug
           in: query
           schema:
             type: string
-            format: uuid
-        - name: provinceId
+        - name: provinceSlug
           in: query
           schema:
             type: string
-            format: uuid
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/sortByParam'
@@ -2179,10 +2172,6 @@ paths:
           schema:
             type: string
         - name: lastName
-          in: query
-          schema:
-            type: string
-        - name: licenseNumber
           in: query
           schema:
             type: string

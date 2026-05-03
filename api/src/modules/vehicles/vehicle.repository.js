@@ -32,14 +32,13 @@ const BASE_QUERY = () =>
 
 export const findAll = async (filters, pagination) => {
   const {
-    registration_number, owner_nic, owner_name, police_status,
+    owner_nic, owner_name, police_status,
     make_model, has_device, ds_division_slug, district_slug, province_slug
   } = filters
   const { offset, limit, sort_by, order } = pagination
 
   const query = BASE_QUERY()
 
-  if (registration_number) query.where('v.registration_number', 'ilike', `%${registration_number}%`)
   if (owner_nic)           query.where('v.owner_nic',           'ilike', `%${owner_nic}%`)
   if (owner_name)          query.where('v.owner_full_name',     'ilike', `%${owner_name}%`)
   if (police_status)       query.where('v.police_status', police_status)

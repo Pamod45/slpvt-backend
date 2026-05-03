@@ -77,12 +77,12 @@ export const createStation = async (data) => {
     }
   }
 
-  const existingName = await stationRepository.findByName(data.name)
+  const existingName = await stationRepository.findByNameIncludingDeleted(data.name)
   if (existingName) {
     throw new ConflictError('A station with this name already exists')
   }
 
-  const existingCode = await stationRepository.findByShortCode(data.short_code)
+  const existingCode = await stationRepository.findByShortCodeIncludingDeleted(data.short_code)
   if (existingCode) {
     throw new ConflictError('A station with this short code already exists')
   }
@@ -109,14 +109,14 @@ export const updateStation = async (shortCode, data) => {
   }
 
   if (data.name && data.name !== station.name) {
-    const existingName = await stationRepository.findByName(data.name)
+    const existingName = await stationRepository.findByNameIncludingDeleted(data.name)
     if (existingName) {
       throw new ConflictError('A station with this name already exists')
     }
   }
 
   if (data.short_code && data.short_code !== station.short_code) {
-    const existingCode = await stationRepository.findByShortCode(data.short_code)
+    const existingCode = await stationRepository.findByShortCodeIncludingDeleted(data.short_code)
     if (existingCode) {
       throw new ConflictError('A station with this short code already exists')
     }

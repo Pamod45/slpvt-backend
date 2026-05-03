@@ -13,7 +13,6 @@ export const assignmentParamsSchema = Joi.object({
 })
 
 export const vehicleQuerySchema = Joi.object({
-  registrationNumber: Joi.string().max(20).optional(),
   ownerNic:           Joi.string().max(20).optional(),
   ownerName:          Joi.string().max(200).optional(),
   policeStatus:       Joi.string().valid(...validStatuses).optional(),

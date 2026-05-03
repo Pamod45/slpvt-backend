@@ -5,7 +5,6 @@ import { PAGINATION } from '../../config/constants.js'
 export const list = async (req, res, next) => {
   try {
     const filters = {
-      registration_number: req.query.registrationNumber?.trim() || undefined,
       owner_nic:           req.query.ownerNic?.trim()           || undefined,
       owner_name:          req.query.ownerName?.trim()          || undefined,
       police_status:       req.query.policeStatus               || undefined,

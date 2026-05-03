@@ -66,6 +66,14 @@ export const findByShortCode = async (shortCode) => {
   return BASE_QUERY().where({ 'stations.short_code': shortCode }).whereNull('stations.deleted_at').first()
 }
 
+export const findByShortCodeIncludingDeleted = async (shortCode) => {
+  return db('stations').where({ short_code: shortCode }).first()
+}
+
+export const findByNameIncludingDeleted = async (name) => {
+  return db('stations').where({ name }).first()
+}
+
 export const findByType = async (stationType) => {
   return db('stations').where({ station_type: stationType }).whereNull('deleted_at').first()
 }
