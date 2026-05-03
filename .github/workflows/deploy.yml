@@ -27,7 +27,7 @@ jobs:
             if [ ! -d "/home/ec2-user/Deployments/slpvt-backend/.git" ]; then
               echo "    Repo not found — cloning for the first time..."
               mkdir -p /home/ec2-user/Deployments
-              git clone https://github.com/Pamod45/slpvt-backend.git /home/ec2-user/Deployments/slpvt-backend
+              git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Pamod45/slpvt-backend.git /home/ec2-user/Deployments/slpvt-backend || { echo "    Clone failed — aborting deployment"; exit 1; }
               echo "    Cloned successfully"
             else
               echo "    Repo found — fetching latest changes..."
