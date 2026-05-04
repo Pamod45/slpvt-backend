@@ -32,7 +32,7 @@ app.use(express.json())
 
 // redirect trailing slashes to non-trailing slashes (except root /) *
 app.use((req, res, next) => {
-  if (req.path.endsWith('/') && req.path.length > 1) {
+  if (req.path.endsWith('/') && req.path.length > 1 && !req.path.startsWith('/slpvt/v1/docs')) {
     const query = req.url.slice(req.path.length)
     const newUrl = req.path.slice(0, -1) + query
     return res.redirect(301, newUrl)
