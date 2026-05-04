@@ -59,7 +59,7 @@ export const liveLocations = async (req, res, next) => {
           ds_division_slug: req.query.dsDivisionSlug
         }
 
-    const data = await locationService.getLiveLocations(query)
+    const data = await locationService.getLiveLocations(query, req.user)
 
     const offset = parseInt(req.query.offset) || 0
     const limit  = Math.min(parseInt(req.query.limit) || 20, 100)

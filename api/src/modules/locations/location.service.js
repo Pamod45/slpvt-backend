@@ -4,7 +4,7 @@ import * as provinceRepository from '../provinces/province.repository.js'
 import * as districtRepository from '../districts/district.repository.js'
 import * as dsRepository from '../divisional-secretariats/divisional-secretariat.repository.js'
 import { formatLiveLocation, formatLiveLocationWithVehicle, formatHistoryPing } from './location.presenter.js'
-import { NotFoundError, UnprocessableError } from '../../utils/errors.js'
+import { NotFoundError, UnprocessableError, ForbiddenError } from '../../utils/errors.js'
 import { TIME_WINDOW } from '../../config/constants.js'
 
 export const recordPing = async (device, body) => {
@@ -36,10 +36,15 @@ export const getLiveLocation = async (registrationNumber) => {
   return formatLiveLocation(ping)
 }
 
-export const getLiveLocations = async ({ province_slug, district_slug, ds_division_slug, ds_division_id }) => {
+const DISTRICT_ROLES   = ['DISTRICT_OFFICER',   'DISTRICT_COMMANDER']
+const PROVINCIAL_ROLES = ['PROVINCIAL_OFFICER', 'PROVINCIAL_COMMANDER']
+
+export const getLiveLocations = async ({ province_slug, district_slug, ds_division_slug, ds_division_id }, executor) => {
+  const role = executor?.role
   let boundaries = []
 
   if (ds_division_id) {
+    // Station roles — forced by controller, no further check needed
     const boundary = await locationRepository.findDSBoundaryById(ds_division_id)
     if (!boundary) throw new NotFoundError('No boundary data found for your assigned DS division')
     boundaries = [boundary]
@@ -48,29 +53,62 @@ export const getLiveLocations = async ({ province_slug, district_slug, ds_divisi
     const ds = await dsRepository.findBySlug(ds_division_slug)
     if (!ds) throw new NotFoundError('DS division not found')
 
+    if (DISTRICT_ROLES.includes(role) && ds.district_id !== executor.district_id) {
+      throw new ForbiddenError('This DS division is outside your district')
+    }
+    if (PROVINCIAL_ROLES.includes(role) && ds.province_id !== executor.province_id) {
+      throw new ForbiddenError('This DS division is outside your province')
+    }
+
     const boundary = await locationRepository.findDSBoundaryById(ds.ds_division_id)
     if (!boundary) throw new NotFoundError('No boundary data found for this DS division')
-
     boundaries = [boundary]
 
   } else if (district_slug) {
+    if (DISTRICT_ROLES.includes(role)) {
+      throw new ForbiddenError('District officers cannot query at district level using a slug — your district boundary is applied automatically')
+    }
+
     const district = await districtRepository.findBySlug(district_slug)
     if (!district) throw new NotFoundError('District not found')
 
+    if (PROVINCIAL_ROLES.includes(role) && district.province_id !== executor.province_id) {
+      throw new ForbiddenError('This district is outside your province')
+    }
+
     const boundary = await locationRepository.findDistrictBoundaryById(district.district_id)
     if (!boundary) throw new NotFoundError('No boundary data found for this district')
-
     boundaries = [boundary]
 
   } else if (province_slug) {
+    if (DISTRICT_ROLES.includes(role)) {
+      throw new ForbiddenError('District officers cannot query at province level')
+    }
+
     const province = await provinceRepository.findBySlug(province_slug)
     if (!province) throw new NotFoundError('Province not found')
 
+    if (PROVINCIAL_ROLES.includes(role) && province.province_id !== executor.province_id) {
+      throw new ForbiddenError('This province is outside your jurisdiction')
+    }
+
     const districtIds = await districtRepository.findIdsByProvinceId(province.province_id)
     if (!districtIds.length) throw new NotFoundError('No districts found for this province')
-
     boundaries = await locationRepository.findDistrictBoundariesByIds(districtIds)
     if (!boundaries.length) throw new NotFoundError('No boundary data found for this province')
+
+  } else {
+    // No slug provided — default to executor's own boundary
+    if (DISTRICT_ROLES.includes(role)) {
+      const boundary = await locationRepository.findDistrictBoundaryById(executor.district_id)
+      if (!boundary) throw new NotFoundError('No boundary data found for your district')
+      boundaries = [boundary]
+    } else if (PROVINCIAL_ROLES.includes(role)) {
+      const districtIds = await districtRepository.findIdsByProvinceId(executor.province_id)
+      if (!districtIds.length) throw new NotFoundError('No districts found for your province')
+      boundaries = await locationRepository.findDistrictBoundariesByIds(districtIds)
+      if (!boundaries.length) throw new NotFoundError('No boundary data found for your province')
+    }
   }
 
   const pings = await locationRepository.findLiveLocationsWithinBoundaries(boundaries)
