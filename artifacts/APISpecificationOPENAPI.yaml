@@ -3,12 +3,15 @@ openapi: 3.0.3
 info:
   title: SLPVT API
   description: Sri Lanka Police Vehicle Tracking System. A REST API for managing stations, vehicles, drivers, tracking devices, and GPS location data.
-  version: 1.0.0
+  version: 1.0.1
   contact:
     name: SLPVT Development Team
 
 servers:
   # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/nibm-01e/slpvt-api-specification/1.0.1
   - description: AWS Deployed server 
     url: http://52.66.55.28/slpvt/v1
   - url: http://localhost:3000/api/v1
@@ -582,7 +585,7 @@ paths:
                 password:
                   type: string
                   format: password
-                  example: testpassword
+                  example: Test@1234
       responses:
         "200":
           description: Login successful
