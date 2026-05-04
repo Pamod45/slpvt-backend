@@ -106,6 +106,10 @@ export const findByBadgeNumber = async (badgeNumber) => {
     .first()
 }
 
+export const findByBadgeNumberIncludingDeleted = async (badgeNumber) => {
+  return db('users').where({ badge_number: badgeNumber }).first()
+}
+
 export const findById = async (userId) => {
   return db('users')
     .where({ user_id: userId })

@@ -36,10 +36,15 @@ export const getLiveLocation = async (registrationNumber) => {
   return formatLiveLocation(ping)
 }
 
-export const getLiveLocations = async ({ province_slug, district_slug, ds_division_slug }) => {
+export const getLiveLocations = async ({ province_slug, district_slug, ds_division_slug, ds_division_id }) => {
   let boundaries = []
 
-  if (ds_division_slug) {
+  if (ds_division_id) {
+    const boundary = await locationRepository.findDSBoundaryById(ds_division_id)
+    if (!boundary) throw new NotFoundError('No boundary data found for your assigned DS division')
+    boundaries = [boundary]
+
+  } else if (ds_division_slug) {
     const ds = await dsRepository.findBySlug(ds_division_slug)
     if (!ds) throw new NotFoundError('DS division not found')
 

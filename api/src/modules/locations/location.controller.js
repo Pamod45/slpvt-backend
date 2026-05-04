@@ -47,11 +47,19 @@ export const locationHistory = async (req, res, next) => {
 
 export const liveLocations = async (req, res, next) => {
   try {
-    const data = await locationService.getLiveLocations({
-      province_slug:    req.query.provinceSlug,
-      district_slug:    req.query.districtSlug,
-      ds_division_slug: req.query.dsDivisionSlug
-    })
+    const { role, ds_division_id } = req.user
+
+    const isStationRole = ['STATION_OFFICER', 'STATION_COMMANDER'].includes(role)
+
+    const query = isStationRole
+      ? { ds_division_id }
+      : {
+          province_slug:    req.query.provinceSlug,
+          district_slug:    req.query.districtSlug,
+          ds_division_slug: req.query.dsDivisionSlug
+        }
+
+    const data = await locationService.getLiveLocations(query)
 
     const offset = parseInt(req.query.offset) || 0
     const limit  = Math.min(parseInt(req.query.limit) || 20, 100)

@@ -39,7 +39,7 @@ export const getByBadge = async (req, res, next) => {
 
 export const create = async (req, res, next) => {
   try {
-    const user = await userService.createUser(req.body, req.user.role)
+    const user = await userService.createUser(req.body, req.user)
     res.status(201).json(created(user))
   } catch (err) { next(err) }
 }

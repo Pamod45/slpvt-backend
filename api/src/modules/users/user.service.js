@@ -74,17 +74,40 @@ export const getUserByBadge = async (badgeNumber, executorBadge) => {
   }
 }
 
-export const createUser = async (data, executorRole) => {
-  checkCeiling(executorRole, data.system_role)
-  
-  const existing = await userRepository.findByBadgeNumber(data.badge_number)
-  if (existing) {
-    throw new ConflictError('A user with this badge number already exists')
+export const createUser = async (data, executor) => {
+  checkCeiling(executor.role, data.system_role)
+
+  const existing = await userRepository.findByBadgeNumberIncludingDeleted(data.badge_number)
+  if (existing) throw new ConflictError('A user with this badge number already exists')
+
+  // Roles with a boundary scope require a station assignment
+  const roleNeedsStation = !['DATA_REGISTRAR', 'SUPER_ADMIN', 'DEVICE_CLIENT'].includes(data.system_role)
+  if (roleNeedsStation && !data.station_short_code) {
+    throw new ValidationError('station_short_code is required for this role')
+  }
+
+  const station = data.station_short_code ? await findStationByShortCode(data.station_short_code) : null
+  if (data.station_short_code && !station) throw new NotFoundError('Station not found')
+
+  checkRoleStationMatch(data.system_role, station?.station_type ?? null)
+
+  // Jurisdiction check — executor can only assign users to stations within their own scope
+  if (executor.role === 'STATION_COMMANDER') {
+    if (!station || station.station_id !== executor.assigned_station_id) {
+      throw new ForbiddenError('You can only create users for your own station')
+    }
+  } else if (executor.role === 'DISTRICT_COMMANDER') {
+    if (!station || station.resolved_district_id !== executor.district_id) {
+      throw new ForbiddenError('You can only create users for stations within your district')
+    }
+  } else if (executor.role === 'PROVINCIAL_COMMANDER') {
+    if (!station || station.resolved_province_id !== executor.province_id) {
+      throw new ForbiddenError('You can only create users for stations within your province')
+    }
   }
 
   const salt = await bcrypt.genSalt(10)
   const hashed = await bcrypt.hash(data.password, salt)
-
   const insertData = { ...data, password_hash: hashed }
 
   if (insertData.system_role === 'DATA_REGISTRAR') {
@@ -92,16 +115,12 @@ export const createUser = async (data, executorRole) => {
     if (!insertData.last_name)  insertData.last_name  = 'Account'
   }
 
-  const station = data.station_short_code ? await findStationByShortCode(data.station_short_code) : null
-  if (data.station_short_code && !station) throw new NotFoundError('Station not found')
-  checkRoleStationMatch(data.system_role, station?.station_type ?? null)
   insertData.assigned_station_id = station?.station_id ?? null
   delete insertData.password
   delete insertData.station_short_code
 
   const createdUser = await userRepository.create(insertData)
-  
-  return await getUserByBadge(createdUser.badge_number, executorRole)
+  return await getUserByBadge(createdUser.badge_number, executor.badge_number)
 }
 
 export const updateUser = async (badgeNumber, data, executor) => {

@@ -60,6 +60,7 @@ export const findByVehicleAndLicense = async (vehicleId, licenseNumber) => {
     .join('drivers as d', 'vda.driver_id', 'd.driver_id')
     .where({ 'vda.vehicle_id': vehicleId })
     .where('d.driving_license_number', licenseNumber)
+    .whereNull('vda.returned_date')
     .select('vda.assignment_id', 'vda.assigned_date', 'vda.returned_date')
     .first()
 }
