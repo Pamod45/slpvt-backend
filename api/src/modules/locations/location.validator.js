@@ -12,15 +12,12 @@ export const locationHistoryQuerySchema = Joi.object({
   .messages({ 'object.and': 'lat, lng and radius must all be provided together' })
 
 export const liveLocationsQuerySchema = Joi.object({
-  provinceSlug:   Joi.string(),
-  districtSlug:   Joi.string(),
-  dsDivisionSlug: Joi.string(),
+  provinceSlug:   Joi.string().optional(),
+  districtSlug:   Joi.string().optional(),
+  dsDivisionSlug: Joi.string().optional(),
   offset: Joi.number().integer().min(0).default(0),
   limit:  Joi.number().integer().min(1).max(100).default(20)
-}).xor('provinceSlug', 'districtSlug', 'dsDivisionSlug')
-  .messages({
-    'object.xor': 'Exactly one of provinceSlug, districtSlug, or dsDivisionSlug is required'
-  })
+})
 
 export const pingSchema = Joi.object({
   location: Joi.object({

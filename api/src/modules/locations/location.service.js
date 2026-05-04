@@ -36,20 +36,19 @@ export const getLiveLocation = async (registrationNumber) => {
   return formatLiveLocation(ping)
 }
 
+const STATION_ROLES    = ['STATION_OFFICER',    'STATION_COMMANDER']
 const DISTRICT_ROLES   = ['DISTRICT_OFFICER',   'DISTRICT_COMMANDER']
 const PROVINCIAL_ROLES = ['PROVINCIAL_OFFICER', 'PROVINCIAL_COMMANDER']
 
-export const getLiveLocations = async ({ province_slug, district_slug, ds_division_slug, ds_division_id }, executor) => {
+export const getLiveLocations = async ({ province_slug, district_slug, ds_division_slug }, executor) => {
   const role = executor?.role
   let boundaries = []
 
-  if (ds_division_id) {
-    // Station roles — forced by controller, no further check needed
-    const boundary = await locationRepository.findDSBoundaryById(ds_division_id)
-    if (!boundary) throw new NotFoundError('No boundary data found for your assigned DS division')
-    boundaries = [boundary]
+  if (ds_division_slug) {
+    if (STATION_ROLES.includes(role)) {
+      throw new ForbiddenError('Station officers cannot specify a DS division — your boundary is applied automatically')
+    }
 
-  } else if (ds_division_slug) {
     const ds = await dsRepository.findBySlug(ds_division_slug)
     if (!ds) throw new NotFoundError('DS division not found')
 
@@ -65,13 +64,16 @@ export const getLiveLocations = async ({ province_slug, district_slug, ds_divisi
     boundaries = [boundary]
 
   } else if (district_slug) {
-    if (DISTRICT_ROLES.includes(role)) {
-      throw new ForbiddenError('District officers cannot query at district level using a slug — your district boundary is applied automatically')
+    if (STATION_ROLES.includes(role)) {
+      throw new ForbiddenError('Station officers cannot specify a district — your boundary is applied automatically')
     }
 
     const district = await districtRepository.findBySlug(district_slug)
     if (!district) throw new NotFoundError('District not found')
 
+    if (DISTRICT_ROLES.includes(role) && district.district_id !== executor.district_id) {
+      throw new ForbiddenError('This district is outside your jurisdiction')
+    }
     if (PROVINCIAL_ROLES.includes(role) && district.province_id !== executor.province_id) {
       throw new ForbiddenError('This district is outside your province')
     }
@@ -81,6 +83,9 @@ export const getLiveLocations = async ({ province_slug, district_slug, ds_divisi
     boundaries = [boundary]
 
   } else if (province_slug) {
+    if (STATION_ROLES.includes(role)) {
+      throw new ForbiddenError('Station officers cannot specify a province — your boundary is applied automatically')
+    }
     if (DISTRICT_ROLES.includes(role)) {
       throw new ForbiddenError('District officers cannot query at province level')
     }
@@ -98,8 +103,12 @@ export const getLiveLocations = async ({ province_slug, district_slug, ds_divisi
     if (!boundaries.length) throw new NotFoundError('No boundary data found for this province')
 
   } else {
-    // No slug provided — default to executor's own boundary
-    if (DISTRICT_ROLES.includes(role)) {
+    // No slug — default to executor's own boundary
+    if (STATION_ROLES.includes(role)) {
+      const boundary = await locationRepository.findDSBoundaryById(executor.ds_division_id)
+      if (!boundary) throw new NotFoundError('No boundary data found for your assigned DS division')
+      boundaries = [boundary]
+    } else if (DISTRICT_ROLES.includes(role)) {
       const boundary = await locationRepository.findDistrictBoundaryById(executor.district_id)
       if (!boundary) throw new NotFoundError('No boundary data found for your district')
       boundaries = [boundary]
