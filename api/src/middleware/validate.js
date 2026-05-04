@@ -31,7 +31,7 @@ export const validateBody = (schema) => {
       )
     }
 
-    Object.assign(req.body, value);
+    req.body = value
     next()
   }
 }
@@ -60,7 +60,7 @@ export const validateQuery = (schema) => {
       )
     }
 
-    Object.assign(req.query, value);
+    req.query = value
     next()
   }
 }
@@ -88,7 +88,7 @@ export const validateParams = (schema) => {
       )
     }
 
-    Object.assign(req.params, value);
+    req.params = value
     next()
   }
 }
