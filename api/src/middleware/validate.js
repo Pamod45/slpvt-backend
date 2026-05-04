@@ -60,7 +60,8 @@ export const validateQuery = (schema) => {
       )
     }
 
-    req.query = value
+    Object.keys(req.query).forEach(key => delete req.query[key])
+    Object.assign(req.query, value)
     next()
   }
 }
@@ -88,7 +89,8 @@ export const validateParams = (schema) => {
       )
     }
 
-    req.params = value
+    Object.keys(req.params).forEach(key => delete req.params[key])
+    Object.assign(req.params, value)
     next()
   }
 }
