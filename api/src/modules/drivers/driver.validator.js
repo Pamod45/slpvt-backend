@@ -38,4 +38,4 @@ export const createDriverSchema = Joi.object({
 
 export const updateDriverSchema = Joi.object({
   police_status: Joi.string().valid(...validStatuses).required()
-})
+}).min(1)

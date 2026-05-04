@@ -63,6 +63,10 @@ export const findIdsByProvinceId = async (provinceId) => {
     .pluck('district_id')
 }
 
+export const findAllIds = async () => {
+  return db('districts').pluck('district_id')
+}
+
 export const findAllByProvinceId = async (provinceId, pagination) => {
   const { offset, limit, sort_by, order } = pagination
 

@@ -43,7 +43,7 @@ export const createVehicleSchema = Joi.object({
   make_model:           Joi.string().max(100).required(),
   owner_nic:            Joi.string().max(20).required(),
   owner_full_name:      Joi.string().max(200).required(),
-  owner_contact:        Joi.string().max(20).optional().allow(null, ''),
+  owner_contact:        Joi.string().max(20).optional().allow(null),
   ds_division_slug:     Joi.string().max(100).required()
 })
 

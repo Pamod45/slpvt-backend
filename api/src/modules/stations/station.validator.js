@@ -27,7 +27,7 @@ export const createStationSchema = Joi.object({
   station_type: Joi.string()
     .valid(...validStationTypes)
     .required(),
-  contact_number: Joi.string().max(20).optional().allow(null, ''),
+  contact_number: Joi.string().max(20).optional().allow(null),
   province_slug: Joi.alternatives().conditional('station_type', {
     is: STATION_TYPES.RANGE_OFFICE,
     then: Joi.string().required().messages({
@@ -66,7 +66,7 @@ export const updateStationSchema = Joi.object({
   station_type: Joi.string()
     .valid(...validStationTypes)
     .optional(),
-  contact_number: Joi.string().max(20).optional().allow(null, ''),
+  contact_number: Joi.string().max(20).optional().allow(null),
   province_slug: Joi.alternatives().conditional('station_type', {
     is: STATION_TYPES.RANGE_OFFICE,
     then: Joi.string().required(),

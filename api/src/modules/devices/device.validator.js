@@ -23,4 +23,4 @@ export const createDeviceSchema = Joi.object({
 
 export const updateDeviceSchema = Joi.object({
   admin_status: Joi.string().valid(...validStatuses).required()
-})
+}).min(1)

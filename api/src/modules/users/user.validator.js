@@ -29,12 +29,12 @@ export const createUserSchema = Joi.object({
   system_role:        Joi.string().valid(...roleValues).required(),
   first_name:         Joi.when('system_role', {
     is:        'DATA_REGISTRAR',
-    then:      Joi.string().max(100).optional().allow('', null),
+    then:      Joi.string().max(100).optional().allow(null),
     otherwise: Joi.string().max(100).required()
   }),
   last_name:          Joi.when('system_role', {
     is:        'DATA_REGISTRAR',
-    then:      Joi.string().max(100).optional().allow('', null),
+    then:      Joi.string().max(100).optional().allow(null),
     otherwise: Joi.string().max(100).required()
   }),
   station_short_code: Joi.string().max(50).optional().allow(null)

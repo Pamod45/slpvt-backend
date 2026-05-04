@@ -82,6 +82,34 @@ const errorHandler = (err, req, res, next) => {
     )
   }
 
+  // PostgreSQL NOT NULL constraint violation
+  if (err.code === '23502') {
+    return res.status(422).json(
+      error(422, 'Missing required field', `Column "${err.column}" cannot be null`)
+    )
+  }
+
+  // PostgreSQL invalid input for enum or type (e.g. empty string into an enum column)
+  if (err.code === '22P02') {
+    return res.status(422).json(
+      error(422, 'Invalid field value', 'One or more values are not valid for their field type')
+    )
+  }
+
+  // PostgreSQL check constraint violation
+  if (err.code === '23514') {
+    return res.status(422).json(
+      error(422, 'Validation failed', 'One or more values violate a database constraint')
+    )
+  }
+
+  // PostgreSQL value too long for column
+  if (err.code === '22001') {
+    return res.status(422).json(
+      error(422, 'Value too long', 'One or more field values exceed the maximum allowed length')
+    )
+  }
+
   // unhandled error — do not leak stack trace in production
   return res.status(500).json(
     error(

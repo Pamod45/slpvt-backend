@@ -117,6 +117,10 @@ export const getLiveLocations = async ({ province_slug, district_slug, ds_divisi
       if (!districtIds.length) throw new NotFoundError('No districts found for your province')
       boundaries = await locationRepository.findDistrictBoundariesByIds(districtIds)
       if (!boundaries.length) throw new NotFoundError('No boundary data found for your province')
+    } else {
+      // SUPER_ADMIN — no params means all boundaries
+      const allDistrictIds = await districtRepository.findAllIds()
+      boundaries = await locationRepository.findDistrictBoundariesByIds(allDistrictIds)
     }
   }
 
